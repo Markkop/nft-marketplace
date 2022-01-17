@@ -1,15 +1,23 @@
-# Basic Sample Hardhat Project
+# 🖼️ NFT Marketplace 
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+[![https://img.shields.io/badge/made%20with-hardhat-yellow](https://img.shields.io/badge/made%20with-hardhat-yellow)](https://hardhat.org/)
+[![https://img.shields.io/badge/made%20with-nextjs-blue](https://img.shields.io/badge/made%20with-nextjs-blue)](https://nextjs.org/)
 
-Try running some of the following tasks:
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+To strengthen my blockchain and smart contract development skills, I'm building this project while following Udemy's [Build An NFT Marketplace From Scratch - Blockchain DApp](https://www.udemy.com/course/build-an-nft-marketplace-from-scratch-blockchain-dapp/) course.
+
+My main goals with this DApp is learning and improving:
+- Smart contracts deployment and interaction using [Hardhat](https://hardhat.org/)
+- Web3 implementations in React/NextJS using [ethers](https://docs.ethers.io/v5/)
+- Solidity and Smart Contracts testing
+
+This project is also part of the study I'm doing to create my own Web 3.0 portfolio.
+
+## Demo
+In progress
+
+## How to run
+In progress
+## How to deploy
+In progress
+
