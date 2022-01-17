@@ -17,7 +17,10 @@ This project is also part of the study I'm doing to create my own Web 3.0 portfo
 In progress
 
 ## How to run
-In progress
+
+* Copy `.env.example` to `.env`
+* [In progress]
+
 ## How to deploy
 In progress
 
