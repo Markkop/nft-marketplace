@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "hardhat/console.sol";
 
-contract KBMarket is ReentrancyGuard {
+contract Marketplace is ReentrancyGuard {
     using Counters for Counters.Counter;
 
     Counters.Counter private _marketItemIds;
