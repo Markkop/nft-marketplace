@@ -30,7 +30,7 @@ contract Marketplace is ReentrancyGuard {
         bool sold;
     }
 
-    event MarketItemMinted(
+    event MarketItemCreated(
         uint256 indexed marketItemId,
         address indexed nftContract,
         uint256 indexed tokenId,
@@ -48,7 +48,7 @@ contract Marketplace is ReentrancyGuard {
         return listingFee;
     }
 
-    function mintMarketItem(
+    function createMarketItem(
         address nftContractAddress,
         uint256 tokenId,
         uint256 price
@@ -77,7 +77,7 @@ contract Marketplace is ReentrancyGuard {
             tokenId
         );
 
-        emit MarketItemMinted(
+        emit MarketItemCreated(
             marketItemId,
             nftContractAddress,
             tokenId,
