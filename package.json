@@ -34,6 +34,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-standard": "^5.0.0",
+    "hardhat-gas-reporter": "^1.0.7",
     "postcss": "^8.4.5",
     "tailwindcss": "^3.0.15"
   }

@@ -1,5 +1,7 @@
-require("@nomiclabs/hardhat-waffle");
-require('dotenv').config({path:__dirname+'/.env'})
+const path = require('path')
+require('@nomiclabs/hardhat-waffle')
+require('dotenv').config({ path: path.join(__dirname, '/.env') })
+require('hardhat-gas-reporter')
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -20,12 +22,12 @@ module.exports = {
     }
   },
   solidity: {
-    version: "0.8.4",
+    version: '0.8.4',
     settings: {
       optimizer: {
         enabled: true,
         runs: 200
       }
     }
-  },
-};
+  }
+}

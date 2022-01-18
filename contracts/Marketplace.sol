@@ -2,7 +2,6 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-// Security agains transactions for multiple requests
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "hardhat/console.sol";
@@ -48,6 +47,10 @@ contract Marketplace is ReentrancyGuard {
         return listingFee;
     }
 
+    /**
+     * @dev Creates a market item listing, requiring a listing fee and transfering the NFT token from
+     * msg.sender to the marketplace contract.
+     */
     function createMarketItem(
         address nftContractAddress,
         uint256 tokenId,
@@ -81,6 +84,10 @@ contract Marketplace is ReentrancyGuard {
         );
     }
 
+    /**
+     * @dev Creates a market sale by transfering msg.sender money to the seller and NFT token from the
+     * marketplace to the msg.sender. It also sends the listingFee to the marketplace owner.
+     */
     function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
         uint256 price = marketItemIdToMarketItem[marketItemId].price;
         uint256 tokenId = marketItemIdToMarketItem[marketItemId].tokenId;
@@ -88,6 +95,7 @@ contract Marketplace is ReentrancyGuard {
 
         marketItemIdToMarketItem[marketItemId].owner = payable(msg.sender);
         marketItemIdToMarketItem[marketItemId].sold = true;
+
         marketItemIdToMarketItem[marketItemId].seller.transfer(msg.value);
         IERC721(nftContractAddress).transferFrom(address(this), msg.sender, tokenId);
 
@@ -96,6 +104,9 @@ contract Marketplace is ReentrancyGuard {
         payable(owner).transfer(listingFee);
     }
 
+    /**
+     * @dev Fetch unsold market items
+     */
     function fetchUnsoldMarketItems() public view returns (MarketItem[] memory) {
         uint256 itemsCount = _marketItemIds.current();
         uint256 unsoldItemsCount = _marketItemIds.current() - _tokensSold.current();
@@ -103,10 +114,12 @@ contract Marketplace is ReentrancyGuard {
 
         uint256 currentIndex = 0;
         for (uint256 i = 0; i < itemsCount; i++) {
-            if (marketItemIdToMarketItem[i + 1].owner == address(0)) {
-                uint256 currentId = i + 1;
-                MarketItem storage currentItem = marketItemIdToMarketItem[currentId];
-                marketItems[currentIndex] = currentItem;
+            // Is this refactor better than the original implementation?
+            // https://github.com/dabit3/polygon-ethereum-nextjs-marketplace/blob/main/contracts/Market.sol#L111
+            // If so, is it better to use memory or storage here?
+            MarketItem memory item = marketItemIdToMarketItem[i + 1];
+            if (item.owner == address(0)) {
+                marketItems[currentIndex] = item;
                 currentIndex += 1;
             }
         }
@@ -114,13 +127,16 @@ contract Marketplace is ReentrancyGuard {
         return marketItems;
     }
 
+    /**
+     * @dev This seems to be the best way to compare strings in Solidity
+     */
     function compareStrings(string memory a, string memory b) private pure returns (bool) {
         return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
 
     /**
      * @dev Since we can't access structs properties dinamically, this function selects the address
-     * we're looking for between "owner" and "seller
+     * we're looking for between "owner" and "seller"
      */
     function getMarketItemAddressByProperty(MarketItem memory item, string memory property)
         private
@@ -132,11 +148,7 @@ contract Marketplace is ReentrancyGuard {
             "Parameter must be 'seller' or 'owner'"
         );
 
-        if (compareStrings(property, "seller")) {
-            return item.seller;
-        } else {
-            return item.owner;
-        }
+        return compareStrings(property, "seller") ? item.seller : item.owner;
     }
 
     /**
@@ -160,10 +172,10 @@ contract Marketplace is ReentrancyGuard {
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < totalItemsCount; i++) {
-            address addressPropertyValue = getMarketItemAddressByProperty(
-                marketItemIdToMarketItem[i + 1],
-                _addressProperty
-            );
+            // Is it ok to assign this variable for better code legbility?
+            // Is it better to use memory or storage in this case?
+            MarketItem storage item = marketItemIdToMarketItem[i + 1];
+            address addressPropertyValue = getMarketItemAddressByProperty(item, _addressProperty);
             if (addressPropertyValue == msg.sender) {
                 itemCount += 1;
             }
@@ -172,14 +184,12 @@ contract Marketplace is ReentrancyGuard {
         MarketItem[] memory items = new MarketItem[](itemCount);
 
         for (uint256 i = 0; i < totalItemsCount; i++) {
-            address addressPropertyValue = getMarketItemAddressByProperty(
-                marketItemIdToMarketItem[i + 1],
-                _addressProperty
-            );
+            // Is it ok to assign this variable for better code legbility?
+            // Is it better to use memory or storage in this case?
+            MarketItem storage item = marketItemIdToMarketItem[i + 1];
+            address addressPropertyValue = getMarketItemAddressByProperty(item, _addressProperty);
             if (addressPropertyValue == msg.sender) {
-                uint256 currentId = i + 1;
-                MarketItem storage currentItem = marketItemIdToMarketItem[currentId];
-                items[currentIndex] = currentItem;
+                items[currentIndex] = item;
                 currentIndex += 1;
             }
         }
