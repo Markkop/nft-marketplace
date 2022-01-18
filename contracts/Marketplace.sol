@@ -13,10 +13,10 @@ contract Marketplace is ReentrancyGuard {
     Counters.Counter private _marketItemIds;
     Counters.Counter private _tokensSold;
 
-    address payable owner;
+    address payable private owner;
 
     // Challenge: make this price dynamic according to the current currency price
-    uint256 listingFee = 0.045 ether;
+    uint256 private listingFee = 0.045 ether;
 
     mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
 
@@ -54,10 +54,7 @@ contract Marketplace is ReentrancyGuard {
         uint256 price
     ) public payable nonReentrant {
         require(price > 0, "Price must be at least 1 wei");
-        require(
-            msg.value == listingFee,
-            "Price must be equal to listing price"
-        );
+        require(msg.value == listingFee, "Price must be equal to listing price");
         _marketItemIds.increment();
         uint256 marketItemId = _marketItemIds.current();
 
@@ -71,11 +68,7 @@ contract Marketplace is ReentrancyGuard {
             false
         );
 
-        IERC721(nftContractAddress).transferFrom(
-            msg.sender,
-            address(this),
-            tokenId
-        );
+        IERC721(nftContractAddress).transferFrom(msg.sender, address(this), tokenId);
 
         emit MarketItemCreated(
             marketItemId,
@@ -88,48 +81,31 @@ contract Marketplace is ReentrancyGuard {
         );
     }
 
-    function createMarketSale(address nftContractAddress, uint256 marketItemId)
-        public
-        payable
-        nonReentrant
-    {
+    function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
         uint256 price = marketItemIdToMarketItem[marketItemId].price;
         uint256 tokenId = marketItemIdToMarketItem[marketItemId].tokenId;
-        require(
-            msg.value == price,
-            "Please submit the asking price in order to continue"
-        );
+        require(msg.value == price, "Please submit the asking price in order to continue");
 
-        marketItemIdToMarketItem[marketItemId].seller.transfer(msg.value);
-        IERC721(nftContractAddress).transferFrom(
-            address(this),
-            msg.sender,
-            tokenId
-        );
         marketItemIdToMarketItem[marketItemId].owner = payable(msg.sender);
         marketItemIdToMarketItem[marketItemId].sold = true;
+        marketItemIdToMarketItem[marketItemId].seller.transfer(msg.value);
+        IERC721(nftContractAddress).transferFrom(address(this), msg.sender, tokenId);
+
         _tokensSold.increment();
 
         payable(owner).transfer(listingFee);
     }
 
-    function fetchUnsoldMarketItems()
-        public
-        view
-        returns (MarketItem[] memory)
-    {
+    function fetchUnsoldMarketItems() public view returns (MarketItem[] memory) {
         uint256 itemsCount = _marketItemIds.current();
-        uint256 unsoldItemsCount = _marketItemIds.current() -
-            _tokensSold.current();
+        uint256 unsoldItemsCount = _marketItemIds.current() - _tokensSold.current();
         MarketItem[] memory marketItems = new MarketItem[](unsoldItemsCount);
 
         uint256 currentIndex = 0;
         for (uint256 i = 0; i < itemsCount; i++) {
             if (marketItemIdToMarketItem[i + 1].owner == address(0)) {
                 uint256 currentId = i + 1;
-                MarketItem storage currentItem = marketItemIdToMarketItem[
-                    currentId
-                ];
+                MarketItem storage currentItem = marketItemIdToMarketItem[currentId];
                 marketItems[currentIndex] = currentItem;
                 currentIndex += 1;
             }
@@ -138,26 +114,21 @@ contract Marketplace is ReentrancyGuard {
         return marketItems;
     }
 
-    function compareStrings(string memory a, string memory b)
-        private
-        pure
-        returns (bool)
-    {
-        return (keccak256(abi.encodePacked((a))) ==
-            keccak256(abi.encodePacked((b))));
+    function compareStrings(string memory a, string memory b) private pure returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
 
     /**
      * @dev Since we can't access structs properties dinamically, this function selects the address
      * we're looking for between "owner" and "seller
      */
-    function getMarketItemAddressByProperty(
-        MarketItem memory item,
-        string memory property
-    ) private pure returns (address) {
+    function getMarketItemAddressByProperty(MarketItem memory item, string memory property)
+        private
+        pure
+        returns (address)
+    {
         require(
-            compareStrings(property, "seller") ||
-                compareStrings(property, "owner"),
+            compareStrings(property, "seller") || compareStrings(property, "owner"),
             "Parameter must be 'seller' or 'owner'"
         );
 
@@ -173,7 +144,7 @@ contract Marketplace is ReentrancyGuard {
      * can be "owner" or "seller". The original implementations were two functions that were
      * almost the same, changing only a property access. This refactored version requires an
      * addional auxiliary function, but avoids repeating code.
-     * @custom:original Original function https://github.com/dabit3/polygon-ethereum-nextjs-marketplace/blob/main/contracts/Market.sol#L121
+     * See original: https://github.com/dabit3/polygon-ethereum-nextjs-marketplace/blob/main/contracts/Market.sol#L121
      */
     function fetchMarketItemsByAddressProperty(string memory _addressProperty)
         public
@@ -181,8 +152,7 @@ contract Marketplace is ReentrancyGuard {
         returns (MarketItem[] memory)
     {
         require(
-            compareStrings(_addressProperty, "seller") ||
-                compareStrings(_addressProperty, "owner"),
+            compareStrings(_addressProperty, "seller") || compareStrings(_addressProperty, "owner"),
             "Parameter must be 'seller' or 'owner'"
         );
         uint256 totalItemsCount = _marketItemIds.current();
@@ -208,9 +178,7 @@ contract Marketplace is ReentrancyGuard {
             );
             if (addressPropertyValue == msg.sender) {
                 uint256 currentId = i + 1;
-                MarketItem storage currentItem = marketItemIdToMarketItem[
-                    currentId
-                ];
+                MarketItem storage currentItem = marketItemIdToMarketItem[currentId];
                 items[currentIndex] = currentItem;
                 currentIndex += 1;
             }

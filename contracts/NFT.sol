@@ -12,13 +12,9 @@ contract NFT is ERC721URIStorage {
     // Counters allow us to keep track of tokenIds
 
     // Address of Marketplace for NFTs to interact
-    address marketplaceAddress;
+    address private marketplaceAddress;
 
-    event TokenMinted(
-        uint256 indexed tokenId,
-        string tokenURI,
-        address marketplaceAddress
-    );
+    event TokenMinted(uint256 indexed tokenId, string tokenURI, address marketplaceAddress);
 
     constructor(address _marketplaceAddress) ERC721("MarkKop", "MARK") {
         marketplaceAddress = _marketplaceAddress;
