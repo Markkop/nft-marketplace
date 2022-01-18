@@ -4,7 +4,7 @@
 [![https://img.shields.io/badge/made%20with-nextjs-blue](https://img.shields.io/badge/made%20with-nextjs-blue)](https://nextjs.org/)
 
 
-To strengthen my blockchain and smart contract development skills, I'm building this project while following Udemy's [Build An NFT Marketplace From Scratch - Blockchain DApp](https://www.udemy.com/course/build-an-nft-marketplace-from-scratch-blockchain-dapp/) course.
+To strengthen my blockchain and smart contract development skills, I'm building this project while following Udemy's [Build An NFT Marketplace From Scratch - Blockchain DApp](https://www.udemy.com/course/build-an-nft-marketplace-from-scratch-blockchain-dapp/) course and changing the code I find relevant.
 
 My main goals with this DApp is learning and improving:
 - Smart contracts deployment and interaction using [Hardhat](https://hardhat.org/)
@@ -16,9 +16,20 @@ This project is also part of the study I'm doing to create my own Web 3.0 portfo
 ## Demo
 In progress
 
-## How to run
+# Setup
+
+To avoid import errors in Solidity files when using VSCode Solidity extensions, add
+```js
+"solidity.packageDefaultDependenciesContractsDirectory": "",
+"solidity.packageDefaultDependenciesDirectory": "node_modules"
+```
+to user's VSCode settings.
 
 * Copy `.env.example` to `.env`
+
+
+## How to run
+
 * [In progress]
 
 ## How to deploy
