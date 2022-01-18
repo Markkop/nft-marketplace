@@ -134,7 +134,7 @@ describe("Marketplace", function () {
     await marketplaceContract.connect(buyer).createMarketSale(nftContractAddress, 1, { value: price });
 
     // Act
-    const buyerNFTTokens = await marketplaceContract.connect(buyer).fetchMyNFTs();
+    const buyerNFTTokens = await marketplaceContract.connect(buyer).fetchMarketItemsByAddressProperty('owner');
 
     // Assert
     expect(buyerNFTTokens.length).to.equal(1)
@@ -151,7 +151,7 @@ describe("Marketplace", function () {
     await mintTokenAndCreateMarketItem(3, price, transactionOptions, buyer);
 
     // Act
-    const buyerNFTTokens = await marketplaceContract.fetchCreatedItems();
+    const buyerNFTTokens = await marketplaceContract.fetchMarketItemsByAddressProperty('seller');
 
     // Assert
     expect(buyerNFTTokens.length).to.equal(2)

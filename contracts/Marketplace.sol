@@ -124,9 +124,7 @@ contract Marketplace is ReentrancyGuard {
         MarketItem[] memory marketItems = new MarketItem[](unsoldItemsCount);
 
         uint256 currentIndex = 0;
-        // Can't we refactor it with .push?
         for (uint256 i = 0; i < itemsCount; i++) {
-            // Can't we use .sold?
             if (marketItemIdToMarketItem[i + 1].owner == address(0)) {
                 uint256 currentId = i + 1;
                 MarketItem storage currentItem = marketItemIdToMarketItem[
@@ -140,53 +138,76 @@ contract Marketplace is ReentrancyGuard {
         return marketItems;
     }
 
-    function fetchMyNFTs() public view returns (MarketItem[] memory) {
-        uint256 totalItemsCount = _marketItemIds.current();
-        uint256 itemCount = 0;
-        uint256 currentIndex = 0;
-
-        for (uint256 i = 0; i < totalItemsCount; i++) {
-            if (marketItemIdToMarketItem[i + 1].owner == msg.sender) {
-                itemCount += 1;
-            }
-        }
-
-        // Is it that important to intialize an array with fixed length?
-        MarketItem[] memory items = new MarketItem[](itemCount);
-
-        for (uint256 i = 0; i < totalItemsCount; i++) {
-            if (marketItemIdToMarketItem[i + 1].owner == msg.sender) {
-                uint256 currentId = marketItemIdToMarketItem[i + 1]
-                    .marketItemId;
-                MarketItem storage currentItem = marketItemIdToMarketItem[
-                    currentId
-                ];
-                items[currentIndex] = currentItem;
-                currentIndex += 1;
-            }
-        }
-
-        return items;
+    function compareStrings(string memory a, string memory b)
+        private
+        pure
+        returns (bool)
+    {
+        return (keccak256(abi.encodePacked((a))) ==
+            keccak256(abi.encodePacked((b))));
     }
 
-    function fetchCreatedItems() public view returns (MarketItem[] memory) {
+    /**
+     * @dev Since we can't access structs properties dinamically, this function selects the address
+     * we're looking for between "owner" and "seller
+     */
+    function getMarketItemAddressByProperty(
+        MarketItem memory item,
+        string memory property
+    ) private pure returns (address) {
+        require(
+            compareStrings(property, "seller") ||
+                compareStrings(property, "owner"),
+            "Parameter must be 'seller' or 'owner'"
+        );
+
+        if (compareStrings(property, "seller")) {
+            return item.seller;
+        } else {
+            return item.owner;
+        }
+    }
+
+    /**
+     * @dev Fetches market items according to the its requested address property that
+     * can be "owner" or "seller". The original implementations were two functions that were
+     * almost the same, changing only a property access. This refactored version requires an
+     * addional auxiliary function, but avoids repeating code.
+     * @custom:original Original function https://github.com/dabit3/polygon-ethereum-nextjs-marketplace/blob/main/contracts/Market.sol#L121
+     */
+    function fetchMarketItemsByAddressProperty(string memory _addressProperty)
+        public
+        view
+        returns (MarketItem[] memory)
+    {
+        require(
+            compareStrings(_addressProperty, "seller") ||
+                compareStrings(_addressProperty, "owner"),
+            "Parameter must be 'seller' or 'owner'"
+        );
         uint256 totalItemsCount = _marketItemIds.current();
         uint256 itemCount = 0;
         uint256 currentIndex = 0;
 
         for (uint256 i = 0; i < totalItemsCount; i++) {
-            if (marketItemIdToMarketItem[i + 1].seller == msg.sender) {
+            address addressPropertyValue = getMarketItemAddressByProperty(
+                marketItemIdToMarketItem[i + 1],
+                _addressProperty
+            );
+            if (addressPropertyValue == msg.sender) {
                 itemCount += 1;
             }
         }
 
-        // Is it that important to intialize an array with fixed length?
         MarketItem[] memory items = new MarketItem[](itemCount);
 
         for (uint256 i = 0; i < totalItemsCount; i++) {
-            if (marketItemIdToMarketItem[i + 1].seller == msg.sender) {
-                uint256 currentId = marketItemIdToMarketItem[i + 1]
-                    .marketItemId;
+            address addressPropertyValue = getMarketItemAddressByProperty(
+                marketItemIdToMarketItem[i + 1],
+                _addressProperty
+            );
+            if (addressPropertyValue == msg.sender) {
+                uint256 currentId = i + 1;
                 MarketItem storage currentItem = marketItemIdToMarketItem[
                     currentId
                 ];
