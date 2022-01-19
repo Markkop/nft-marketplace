@@ -118,10 +118,9 @@ contract Marketplace is ReentrancyGuard {
             // https://github.com/dabit3/polygon-ethereum-nextjs-marketplace/blob/main/contracts/Market.sol#L111
             // If so, is it better to use memory or storage here?
             MarketItem memory item = marketItemIdToMarketItem[i + 1];
-            if (item.owner == address(0)) {
-                marketItems[currentIndex] = item;
-                currentIndex += 1;
-            }
+            if (item.owner != address(0)) continue;
+            marketItems[currentIndex] = item;
+            currentIndex += 1;
         }
 
         return marketItems;
@@ -176,9 +175,8 @@ contract Marketplace is ReentrancyGuard {
             // Is it better to use memory or storage in this case?
             MarketItem storage item = marketItemIdToMarketItem[i + 1];
             address addressPropertyValue = getMarketItemAddressByProperty(item, _addressProperty);
-            if (addressPropertyValue == msg.sender) {
-                itemCount += 1;
-            }
+            if (addressPropertyValue != msg.sender) continue;
+            itemCount += 1;
         }
 
         MarketItem[] memory items = new MarketItem[](itemCount);
@@ -188,10 +186,9 @@ contract Marketplace is ReentrancyGuard {
             // Is it better to use memory or storage in this case?
             MarketItem storage item = marketItemIdToMarketItem[i + 1];
             address addressPropertyValue = getMarketItemAddressByProperty(item, _addressProperty);
-            if (addressPropertyValue == msg.sender) {
-                items[currentIndex] = item;
-                currentIndex += 1;
-            }
+            if (addressPropertyValue != msg.sender) continue;
+            items[currentIndex] = item;
+            currentIndex += 1;
         }
 
         return items;
