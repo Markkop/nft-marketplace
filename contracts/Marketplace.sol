@@ -151,6 +151,20 @@ contract Marketplace is ReentrancyGuard {
     }
 
     /**
+     * @dev Fetch market items that are being listed by the msg.sender
+     */
+    function fetchSellingMarketItems() public view returns (MarketItem[] memory) {
+        return fetchMarketItemsByAddressProperty("seller");
+    }
+
+    /**
+     * @dev Fetch market items that are owned by the msg.sender
+     */
+    function fetchOwnedMarketItems() public view returns (MarketItem[] memory) {
+        return fetchMarketItemsByAddressProperty("owner");
+    }
+
+    /**
      * @dev Fetches market items according to the its requested address property that
      * can be "owner" or "seller". The original implementations were two functions that were
      * almost the same, changing only a property access. This refactored version requires an
