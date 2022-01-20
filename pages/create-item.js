@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ethers } from 'ethers'
-import { create as ipfsHttpClient } from 'ipfs-http-client'
+import axios from 'axios'
 import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 import { useForm } from 'react-hook-form'
@@ -12,14 +12,23 @@ import {
 import NFT from '../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../artifacts/contracts/Marketplace.sol/Marketplace.json'
 
-async function uploadDataToIPFS (data) {
-  try {
-    const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
-    const added = await client.add(data)
-    return `https://ipfs.infura.io/ipfs/${added.path}`
-  } catch (error) {
-    console.log('Error uploading file: ', error)
-  }
+function createNFTFormDataFile (name, description, price, file) {
+  const formData = new FormData()
+  formData.append('name', name)
+  formData.append('description', description)
+  formData.append('price', price)
+  formData.append('file', file[0])
+  return formData
+}
+
+async function uploadFileToIPFS (formData) {
+  const { data } = await axios.post('/api/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  return data.url
 }
 
 export default function CreateItem () {
@@ -28,15 +37,10 @@ export default function CreateItem () {
   const router = useRouter()
 
   async function onFileChange (event) {
-    const file = event.target.files[0]
-    const url = await uploadDataToIPFS(file)
-    setFileUrl(url)
+    setFileUrl(URL.createObjectURL(event.target.files[0]))
   }
 
-  async function createMarket (name, description, price, assetFileUrl) {
-    if (!name || !description || !price || !assetFileUrl) return
-    const data = JSON.stringify({ name, description, image: assetFileUrl })
-    const metadataUrl = await uploadDataToIPFS(data)
+  async function createMarket (price, metadataUrl) {
     await createSale(metadataUrl, price)
   }
 
@@ -66,9 +70,10 @@ export default function CreateItem () {
     router.push('/')
   }
 
-  async function onSubmit (formData) {
-    const { name, description, price } = formData
-    await createMarket(name, description, price, fileUrl)
+  async function onSubmit ({ name, description, price, file }) {
+    const formData = createNFTFormDataFile(name, description, price, file)
+    const url = await uploadFileToIPFS(formData)
+    await createMarket(price, url)
   }
 
   return (
@@ -76,27 +81,28 @@ export default function CreateItem () {
       <div className="w-1/2 flex flex-col pb-12">
         <form onSubmit={handleSubmit(onSubmit)}>
           <input
-            placeholder="Asset Name"
+            placeholder="NFT Name"
             className="mt-8 border rounded p-4"
             name="name"
             {...register('name')}
           />
           <textarea
-            placeholder="Asset Description"
+            placeholder="NFT Description"
             className="mt-2 border rounded p-4"
             name="description"
             {...register('description')}
           />
           <input
-            placeholder="Asset Price"
+            placeholder="NFT Price"
             className="mt-2 border rounded p-4"
             name="price"
             {...register('price')}
           />
           <input
             type="file"
-            name="Asset"
+            name="file"
             className="my-4"
+            {...register('file')}
             onChange={onFileChange}
           />
           {
@@ -105,7 +111,7 @@ export default function CreateItem () {
             )
           }
           <button type="submit" className="font-bold mt-4 bg-pink-500 text-white rounded p-4 shadow-lg">
-            Create Digital Asset
+            Create Digital NFT
           </button>
         </form>
 
