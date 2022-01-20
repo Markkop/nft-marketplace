@@ -85,6 +85,24 @@ contract Marketplace is ReentrancyGuard {
     }
 
     /**
+     * @dev Get Market Item by the token id
+     */
+    function getMarketItemByTokenId(uint256 tokenId) public view returns (MarketItem memory) {
+        uint256 itemsCount = _marketItemIds.current();
+
+        for (uint256 i = 0; i < itemsCount; i++) {
+            MarketItem memory item = marketItemIdToMarketItem[i + 1];
+            if (item.tokenId != tokenId) continue;
+            return item;
+        }
+
+        // What is the best practice for returning a "null" value in solidity?
+        // I don't want to revert it because it might be worse to handle it in the frontend app
+        MarketItem memory emptyMarketItem;
+        return emptyMarketItem;
+    }
+
+    /**
      * @dev Creates a market sale by transfering msg.sender money to the seller and NFT token from the
      * marketplace to the msg.sender. It also sends the listingFee to the marketplace owner.
      */

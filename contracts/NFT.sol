@@ -9,10 +9,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract NFT is ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
-    // Counters allow us to keep track of tokenIds
 
-    // Address of Marketplace for NFTs to interact
     address private marketplaceAddress;
+    mapping(uint256 => address) private _creators;
 
     event TokenMinted(uint256 indexed tokenId, string tokenURI, address marketplaceAddress);
 
@@ -24,6 +23,7 @@ contract NFT is ERC721URIStorage {
         _tokenIds.increment();
         uint256 newItemId = _tokenIds.current();
         _mint(msg.sender, newItemId);
+        _creators[newItemId] = msg.sender;
         _setTokenURI(newItemId, tokenURI);
 
         // Give the marketplace approval to transact NFTs between users
@@ -31,5 +31,43 @@ contract NFT is ERC721URIStorage {
 
         emit TokenMinted(newItemId, tokenURI, marketplaceAddress);
         return newItemId;
+    }
+
+    function getTokensOwnedByMe() public view returns (uint256[] memory) {
+        uint256 numberOfExistingTokens = _tokenIds.current();
+        uint256 numberOfTokensOwned = balanceOf(msg.sender);
+        uint256[] memory ownedTokenIds = new uint256[](numberOfTokensOwned);
+
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < numberOfExistingTokens; i++) {
+            uint256 tokenId = i + 1;
+            if (ownerOf(tokenId) != msg.sender) continue;
+            ownedTokenIds[currentIndex] = tokenId;
+            currentIndex += 1;
+        }
+
+        return ownedTokenIds;
+    }
+
+    function getTokensCreatedByMe() public view returns (uint256[] memory) {
+        uint256 numberOfExistingTokens = _tokenIds.current();
+        uint256 numberOfTokensCreated = 0;
+
+        for (uint256 i = 0; i < numberOfExistingTokens; i++) {
+            uint256 tokenId = i + 1;
+            if (_creators[tokenId] != msg.sender) continue;
+            numberOfTokensCreated += 1;
+        }
+
+        uint256[] memory createdTokenIds = new uint256[](numberOfTokensCreated);
+        uint256 currentIndex = 0;
+        for (uint256 i = 0; i < numberOfExistingTokens; i++) {
+            uint256 tokenId = i + 1;
+            if (_creators[tokenId] != msg.sender) continue;
+            createdTokenIds[currentIndex] = tokenId;
+            currentIndex += 1;
+        }
+
+        return createdTokenIds;
     }
 }

@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const { ethers } = require('hardhat')
+const { BigNumber } = require('ethers')
 
 describe('Marketplace', function () {
   let nftContract
@@ -47,6 +48,31 @@ describe('Marketplace', function () {
         price,
         false
       )
+  })
+
+  it('gets a Market Item by the token id', async function () {
+    // Arrange
+    const tokenId = 3
+    const price = ethers.utils.parseEther('10')
+    const listingFee = await marketplaceContract.getListingFee()
+    const transactionOptions = { value: listingFee }
+    await nftContract.mintToken('')
+    await nftContract.mintToken('')
+    await mintTokenAndCreateMarketItem(tokenId, price, transactionOptions)
+
+    // Act
+    const marketItem = await marketplaceContract.getMarketItemByTokenId(tokenId)
+
+    // Assert
+    expect(marketItem).to.eql([
+      BigNumber.from(1),
+      nftContractAddress,
+      BigNumber.from(tokenId),
+      owner.address,
+      ethers.constants.AddressZero,
+      price,
+      false
+    ])
   })
 
   it('reverts a Market Item creation if listing fee is not right', async function () {
