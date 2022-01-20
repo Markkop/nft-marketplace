@@ -1,6 +1,6 @@
 const path = require('path')
 require('@nomiclabs/hardhat-waffle')
-require('dotenv').config({ path: path.join(__dirname, '/.env') })
+require('dotenv').config({ path: path.join(__dirname, '/.env.local') })
 require('hardhat-gas-reporter')
 
 /**

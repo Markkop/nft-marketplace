@@ -4,8 +4,7 @@ import middleware from './middleware/middleware'
 import nextConnect from 'next-connect'
 import FormData from 'form-data'
 
-const ipfsLocalBaseUrl = 'http://127.0.0.1:5001'
-const ipfsInfuraBaseUrl = 'https://ipfs.infura.io'
+const pinataBaseUrl = 'https://api.pinata.cloud'
 
 const handler = nextConnect()
 handler.use(middleware)
@@ -16,41 +15,55 @@ export const config = {
   }
 }
 
-handler.post(async function handlePost (request, response) {
+handler.post(async function handlePost ({ body, files }, response) {
   try {
-    const ipfsBaseUrl = await getIpfsBaseUrl()
-    const fileUrl = await uploadDataToIPFS(ipfsBaseUrl, request.files.file[0])
+    const fileUrl = await uploadFileToIPFS(files.file[0])
+    const metadata = {
+      name: body.name[0],
+      description: body.description[0],
+      price: body.price[0],
+      image: fileUrl
+    }
+
+    const metadaUrl = await uploadJsonToIPFS(metadata)
     return response.status(200).json({
-      fileUrl
+      url: metadaUrl
     })
   } catch (error) {
     console.log('Error uploading file: ', error)
   }
 })
 
-async function getIpfsBaseUrl () {
-  try {
-    await axios.post(`${ipfsLocalBaseUrl}/api/v0/version`)
-    return ipfsLocalBaseUrl
-  } catch (error) {
-    return ipfsInfuraBaseUrl
-  }
-}
+async function uploadFileToIPFS (data) {
+  const formData = new FormData()
+  formData.append('file', fs.createReadStream(data.path), data.originalFileName)
 
-async function uploadDataToIPFS (ipfsBaseUrl, data) {
   try {
-    const formData = new FormData()
-    formData.append('file', fs.createReadStream(data.path), data.originalFileName)
-
-    const { data: responseData } = await axios.post(`${ipfsBaseUrl}/api/v0/add`, formData, {
-      headers: { 'Content-Type': `multipart/form-data; boundary=${formData._boundary}` }
+    const { data: responseData } = await axios.post(`${pinataBaseUrl}/pinning/pinFileToIPFS`, formData, {
+      headers: {
+        'Content-Type': `multipart/form-data; boundary=${formData._boundary}`,
+        pinata_api_key: process.env.PINATA_API_KEY,
+        pinata_secret_api_key: process.env.PINATA_SECRET_KEY
+      }
     })
-
-    const url = `https://ipfs.io/ipfs/${responseData.Hash}?filename=${responseData.Name}`
-
+    const url = `https://ipfs.io/ipfs/${responseData.IpfsHash}?filename=${data.originalFilename}`
     return url
   } catch (error) {
     console.log(error)
+  }
+}
+async function uploadJsonToIPFS (json, fileName) {
+  try {
+    const { data: responseData } = await axios.post(`${pinataBaseUrl}/pinning/pinJSONToIPFS`, json, {
+      headers: {
+        pinata_api_key: process.env.PINATA_API_KEY,
+        pinata_secret_api_key: process.env.PINATA_SECRET_KEY
+      }
+    })
+    const url = `https://ipfs.io/ipfs/${responseData.IpfsHash}?filename=${fileName}`
+    return url
+  } catch (error) {
+    console.log(error.response.data)
   }
 }
 
