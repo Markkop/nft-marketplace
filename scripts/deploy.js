@@ -1,5 +1,19 @@
 const hre = require('hardhat')
+const dotenv = require('dotenv')
 const fs = require('fs')
+
+function replaceEnvContractAddresses (marketplaceAddress, nftAddress) {
+  const envFileName = '.env.local'
+  const envFile = fs.readFileSync(envFileName, 'utf-8')
+  const env = dotenv.parse(envFile)
+  env.MARKETPLACE_CONTRACT_ADDRESS = marketplaceAddress
+  env.NFT_CONTRACT_ADDRESS = nftAddress
+  const newEnv = Object.entries(env).reduce((env, [key, value]) => {
+    return `${env}${key}=${value}\n`
+  }, '')
+
+  fs.writeFileSync(envFileName, newEnv)
+}
 
 async function main () {
   process.env.IS_RUNNING = true
@@ -13,14 +27,7 @@ async function main () {
   await nft.deployed()
   console.log('Nft deployed to:', nft.address)
 
-  const config = `module.exports = {
-  nftmarketaddress: '${marketplace.address}',
-  nftaddress: '${nft.address}'
-}
-`
-
-  const data = JSON.stringify(config)
-  fs.writeFileSync('config.js', JSON.parse(data))
+  replaceEnvContractAddresses(marketplace.address, nft.address)
 }
 
 main()

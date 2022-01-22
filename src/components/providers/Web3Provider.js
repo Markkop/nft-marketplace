@@ -1,9 +1,9 @@
 import { createContext, useEffect, useState } from 'react'
 import Web3Modal from 'web3modal'
 import { ethers } from 'ethers'
-import { nftmarketaddress, nftaddress } from '../../../config'
 import NFT from '../../../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../../../artifacts/contracts/Marketplace.sol/Marketplace.json'
+import axios from 'axios'
 
 const contextDefaultValues = {
   account: '',
@@ -58,9 +58,10 @@ export default function NFTModalProvider ({ children }) {
   }
 
   async function setupContracts (signer) {
-    const marketplaceContract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
+    const { data } = await axios('/api/addresses')
+    const marketplaceContract = new ethers.Contract(data.marketplaceAddress, Market.abi, signer)
     setMarketplaceContract(marketplaceContract)
-    const nftContract = new ethers.Contract(nftaddress, NFT.abi, signer)
+    const nftContract = new ethers.Contract(data.nftAddress, NFT.abi, signer)
     setNFTContract(nftContract)
     setIsReady(true)
   }
