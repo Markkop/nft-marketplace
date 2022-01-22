@@ -11,6 +11,7 @@ import { makeStyles } from '@mui/styles'
 import { NFTModalContext } from './providers/NFTModalProvider'
 import { Web3Context } from './providers/Web3Provider'
 import { ethers } from 'ethers'
+import CardAddress from './atoms/CardAddress'
 
 const useStyles = makeStyles({
   root: {
@@ -38,6 +39,7 @@ export default function NFTCard ({ nft, updateNFT }) {
   const classes = useStyles()
   const { name, description, image } = nft
   const { nftContract, marketplaceContract } = useContext(Web3Context)
+  const priceLabel = nft.price ? `Price (last time sold for ${nft.price} ETH)` : 'Price'
 
   async function sellNft (nftTokenId, priceInEther) {
     const listingFee = await marketplaceContract.getListingFee()
@@ -71,7 +73,7 @@ export default function NFTCard ({ nft, updateNFT }) {
         </Typography>
         <TextField
           id="price-input"
-          label="Price"
+          label={priceLabel}
           name="price"
           size="small"
           fullWidth
@@ -84,6 +86,9 @@ export default function NFTCard ({ nft, updateNFT }) {
         <Typography variant="body2" color="text.secondary">
           {description}
         </Typography>
+        <CardAddress title="Creator" address={nft.creator} />
+        <CardAddress title="Owner" address={nft.owner} />
+        {nft.seller && <CardAddress title="Last sold by" address={nft.seller} />}
       </CardContent>
       <CardActions>
         <Button size="small" onClick={() => onSell({ nft })}>Sell</Button>
