@@ -4,10 +4,11 @@ import axios from 'axios'
 
 import NFTCardList from '../src/components/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
+import { LinearProgress } from '@mui/material'
 
 export default function Home () {
   const [nfts, setNfts] = useState([])
-  const [loadingState, setLoadingState] = useState('not-loaded')
+  const [isLoading, setIsLoading] = useState(true)
   const { account, marketplaceContract, nftContract, isReady } = useContext(Web3Context)
 
   useEffect(() => {
@@ -23,7 +24,8 @@ export default function Home () {
       const price = ethers.utils.formatUnits(i.price.toString(), 'ether')
       const item = {
         price,
-        marketItemId: i.marketItemId.toNumber(),
+        marketItemId: i.marketItemId,
+        tokenId: i.tokenId,
         creator: i.creator,
         seller: i.seller,
         owner: i.owner,
@@ -34,11 +36,12 @@ export default function Home () {
       return item
     }))
     setNfts(items)
-    setLoadingState('loaded')
+    setIsLoading(false)
   }
 
-  if (loadingState === 'loaded' && !nfts.length) return (<h1>No items in marketplace</h1>)
+  if (isLoading) return <LinearProgress/>
+  if (!isLoading && !nfts.length) return <h1>No NFTs for sale</h1>
   return (
-    <NFTCardList nfts={nfts} withCreateNFT={false}/>
+    <NFTCardList nfts={nfts} setNfts={setNfts} withCreateNFT={false}/>
   )
 }
