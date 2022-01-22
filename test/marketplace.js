@@ -44,35 +44,97 @@ describe('Marketplace', function () {
         nftContractAddress,
         tokenId,
         owner.address,
+        owner.address,
         ethers.constants.AddressZero,
         price,
         false
       )
   })
 
-  it('gets a Market Item by the token id', async function () {
+  it('creates successive market items for the same token id by buying and selling', async function () {
     // Arrange
-    const tokenId = 3
+    const token1id = 1
     const price = ethers.utils.parseEther('10')
     const listingFee = await marketplaceContract.getListingFee()
-    const transactionOptions = { value: listingFee }
+
+    // Account1 mints two tokens and put them for sale
     await nftContract.mintToken('')
-    await nftContract.mintToken('')
-    await mintTokenAndCreateMarketItem(tokenId, price, transactionOptions)
+    await marketplaceContract.createMarketItem(nftContractAddress, token1id, price, { value: listingFee })
+
+    // Account 2 buys token 1
+    const token1marketItemId = 1
+    await marketplaceContract.connect(buyer).createMarketSale(nftContractAddress, token1marketItemId, { value: price })
+
+    // Account 2 puts token 1 for sale
+    await nftContract.connect(buyer).approve(marketplaceContract.address, token1id)
+    await marketplaceContract.connect(buyer).createMarketItem(nftContractAddress, token1id, price, { value: listingFee })
 
     // Act
-    const marketItem = await marketplaceContract.getMarketItemByTokenId(tokenId)
+    // Account 1 buys token 1 back
+    await marketplaceContract.createMarketSale(nftContractAddress, token1marketItemId, { value: price })
 
     // Assert
-    expect(marketItem).to.eql([
-      BigNumber.from(1),
+    const tokenOwner = await nftContract.ownerOf(token1id)
+    expect(tokenOwner).to.eql(owner.address)
+  })
+
+  it('gets latest Market Item by the token id', async function () {
+    // Arrange
+    const token1id = 1
+    const token2id = 2
+    const price = ethers.utils.parseEther('10')
+    const listingFee = await marketplaceContract.getListingFee()
+
+    // Account1 mints two tokens and put them for sale
+    await nftContract.mintToken('')
+    await nftContract.mintToken('')
+    await marketplaceContract.createMarketItem(nftContractAddress, token1id, price, { value: listingFee })
+    await marketplaceContract.createMarketItem(nftContractAddress, token2id, price, { value: listingFee })
+
+    // Account 2 buys token 1
+    const token1marketItemId = 1
+    await marketplaceContract.connect(buyer).createMarketSale(nftContractAddress, token1marketItemId, { value: price })
+
+    // Account 2 puts token 1 for sale
+    await nftContract.connect(buyer).approve(marketplaceContract.address, token1id)
+    await marketplaceContract.connect(buyer).createMarketItem(nftContractAddress, token1id, price, { value: listingFee })
+
+    // Act
+    const marketItemResult = await marketplaceContract.getLatestMarketItemByTokenId(token1id)
+
+    // Assert
+    const marketItem = [
+      BigNumber.from(3),
       nftContractAddress,
-      BigNumber.from(tokenId),
+      BigNumber.from(token1id),
       owner.address,
+      buyer.address,
       ethers.constants.AddressZero,
       price,
       false
-    ])
+    ]
+    expect(marketItemResult).to.eql([marketItem, true])
+  })
+
+  it('does not get a Market Item by a nonexistent token id', async function () {
+    // Arrange
+    const tokenId = 1
+
+    // Act
+    const marketItemResult = await marketplaceContract.getLatestMarketItemByTokenId(tokenId)
+
+    // Assert
+    const emptyMarketItem = [
+      BigNumber.from(0),
+      ethers.constants.AddressZero,
+      BigNumber.from(0),
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      BigNumber.from(0),
+      false
+    ]
+    expect(marketItemResult).to.eql([emptyMarketItem, false])
   })
 
   it('reverts a Market Item creation if listing fee is not right', async function () {

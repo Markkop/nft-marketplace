@@ -2,9 +2,9 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "./NFT.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "hardhat/console.sol";
 
 contract Marketplace is ReentrancyGuard {
     using Counters for Counters.Counter;
@@ -23,6 +23,7 @@ contract Marketplace is ReentrancyGuard {
         uint256 marketItemId;
         address nftContractAddress;
         uint256 tokenId;
+        address payable creator;
         address payable seller;
         address payable owner;
         uint256 price;
@@ -33,6 +34,7 @@ contract Marketplace is ReentrancyGuard {
         uint256 indexed marketItemId,
         address indexed nftContract,
         uint256 indexed tokenId,
+        address creator,
         address seller,
         address owner,
         uint256 price,
@@ -61,10 +63,13 @@ contract Marketplace is ReentrancyGuard {
         _marketItemIds.increment();
         uint256 marketItemId = _marketItemIds.current();
 
+        address creator = NFT(nftContractAddress).getTokenCreatorById(tokenId);
+
         marketItemIdToMarketItem[marketItemId] = MarketItem(
             marketItemId,
             nftContractAddress,
             tokenId,
+            payable(creator),
             payable(msg.sender),
             payable(address(0)),
             price,
@@ -77,6 +82,7 @@ contract Marketplace is ReentrancyGuard {
             marketItemId,
             nftContractAddress,
             tokenId,
+            payable(creator),
             payable(msg.sender),
             payable(address(0)),
             price,
@@ -85,21 +91,21 @@ contract Marketplace is ReentrancyGuard {
     }
 
     /**
-     * @dev Get Market Item by the token id
+     * @dev Get Latest Market Item by the token id
      */
-    function getMarketItemByTokenId(uint256 tokenId) public view returns (MarketItem memory) {
+    function getLatestMarketItemByTokenId(uint256 tokenId) public view returns (MarketItem memory, bool) {
         uint256 itemsCount = _marketItemIds.current();
 
-        for (uint256 i = 0; i < itemsCount; i++) {
-            MarketItem memory item = marketItemIdToMarketItem[i + 1];
+        for (uint256 i = itemsCount; i > 0; i--) {
+            MarketItem memory item = marketItemIdToMarketItem[i];
             if (item.tokenId != tokenId) continue;
-            return item;
+            return (item, true);
         }
 
         // What is the best practice for returning a "null" value in solidity?
-        // I don't want to revert it because it might be worse to handle it in the frontend app
+        // Reverting does't seem to be the best approach as it would throw an error on frontend
         MarketItem memory emptyMarketItem;
-        return emptyMarketItem;
+        return (emptyMarketItem, false);
     }
 
     /**

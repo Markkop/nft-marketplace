@@ -54,4 +54,10 @@ describe('NFT', function () {
       BigNumber.from(3)
     ])
   })
+
+  it('gets token creator by id', async function () {
+    await nftContract.mintToken('')
+    const creator = await nftContract.getTokenCreatorById(1)
+    expect(creator).to.eql(account1.address)
+  })
 })

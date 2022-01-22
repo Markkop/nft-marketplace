@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function NavItem ({ title, href }) {
   return (
-    <Link href={href}>
+    <Link href={href} className="navbar-item">
       <a className="mr-4 text-pink-500">
         {title}
       </a>
