@@ -21,11 +21,10 @@ handler.post(async function handlePost ({ body, files }, response) {
     const metadata = {
       name: body.name[0],
       description: body.description[0],
-      price: body.price[0],
       image: fileUrl
     }
 
-    const metadaUrl = await uploadJsonToIPFS(metadata)
+    const metadaUrl = await uploadJsonToIPFS(metadata, body.name[0])
     return response.status(200).json({
       url: metadaUrl
     })

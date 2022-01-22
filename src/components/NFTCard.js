@@ -8,7 +8,6 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import { makeStyles } from '@mui/styles'
 import { NFTModalContext } from './providers/NFTModalProvider'
-import { useRouter } from 'next/router'
 import CardAddress from './atoms/CardAddress'
 import { Web3Context } from './providers/Web3Provider'
 import { ethers } from 'ethers'
@@ -33,12 +32,14 @@ const useStyles = makeStyles({
   }
 })
 
-export default function NFTCard ({ nft, action }) {
+export default function NFTCard ({ nft, action, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
-  const router = useRouter()
   const classes = useStyles()
   const { name, description, image, price } = nft
   const { nftContract, marketplaceContract } = useContext(Web3Context)
+  const isSold = action === 'none'
+  const sellerAddressTitle = isSold ? 'Last sold by' : 'Seller'
+  const priceText = isSold ? `Last sold for ${price} ETH` : `${price} ETH`
 
   const actions = {
     buy: {
@@ -61,7 +62,7 @@ export default function NFTCard ({ nft, action }) {
       value: price
     })
     await transaction.wait()
-    return transaction
+    updateNFT()
   }
 
   function handleCardImageClick () {
@@ -71,7 +72,7 @@ export default function NFTCard ({ nft, action }) {
 
   async function onClick ({ nft }) {
     await actions[action].method(nft)
-    router.reload(window.location.pathname)
+    // router.reload(window.location.pathname)
   }
 
   return (
@@ -87,14 +88,14 @@ export default function NFTCard ({ nft, action }) {
           {name}
         </Typography>
         <Typography gutterBottom variant="h6" component="div">
-        {`${price} ETH`}
+        {priceText}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {description}
         </Typography>
         <CardAddress title="Creator" address={nft.creator} />
         <CardAddress title="Owner" address={nft.owner} />
-        <CardAddress title="Seller" address={nft.seller} />
+        <CardAddress title={sellerAddressTitle} address={nft.seller} />
       </CardContent>
       <CardActions>
         <Button size="small" onClick={() => onClick({ nft })}>{actions[action].text}</Button>

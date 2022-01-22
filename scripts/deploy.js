@@ -1,6 +1,5 @@
 const hre = require('hardhat')
 const fs = require('fs')
-// const { mintNFTsAndCreateMarketItems } = require('./mintNFTsAndCreateMarketItems')
 
 async function main () {
   process.env.IS_RUNNING = true
@@ -22,8 +21,6 @@ async function main () {
 
   const data = JSON.stringify(config)
   fs.writeFileSync('config.js', JSON.parse(data))
-
-  // await mintNFTsAndCreateMarketItems(marketplace.address, nft.address)
 }
 
 main()

@@ -7,7 +7,6 @@ import CardMedia from '@mui/material/CardMedia'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { makeStyles } from '@mui/styles'
-import { useRouter } from 'next/router'
 import axios from 'axios'
 import { useForm } from 'react-hook-form'
 import { Web3Context } from './providers/Web3Provider'
@@ -32,8 +31,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default function CreateNFTCard () {
-  const router = useRouter()
+export default function CreateNFTCard ({ addNFTToList }) {
   const [file, setFile] = useState(null)
   const [fileUrl, setFileUrl] = useState('https://miro.medium.com/max/250/1*DSNfSDcOe33E2Aup1Sww2w.jpeg')
   const classes = useStyles()
@@ -42,14 +40,16 @@ export default function CreateNFTCard () {
 
   async function createNft (metadataUrl) {
     const transaction = await nftContract.mintToken(metadataUrl)
-    await transaction.wait()
+    const tx = await transaction.wait()
+    const event = tx.events[0]
+    const tokenId = event.args[2]
+    return tokenId
   }
 
-  function createNFTFormDataFile (name, description, price, file) {
+  function createNFTFormDataFile (name, description, file) {
     const formData = new FormData()
     formData.append('name', name)
     formData.append('description', description)
-    formData.append('price', price)
     formData.append('file', file)
     return formData
   }
@@ -68,15 +68,15 @@ export default function CreateNFTCard () {
     setFileUrl(URL.createObjectURL(event.target.files[0]))
   }
 
-  async function onSubmit ({ name, description, price }) {
-    const formData = createNFTFormDataFile(name, description, price, file)
+  async function onSubmit ({ name, description }) {
+    const formData = createNFTFormDataFile(name, description, file)
     const metadataUrl = await uploadFileToIPFS(formData)
-    await createNft(metadataUrl)
-    router.reload(window.location.pathname)
+    const tokenId = await createNft(metadataUrl)
+    addNFTToList(tokenId)
   }
 
   return (
-    <Card className={classes.root} sx={{ maxWidth: 345 }} component="form" onSubmit={handleSubmit(onSubmit)}>
+    <Card className={classes.root} component="form" sx={{ maxWidth: 345 }} onSubmit={handleSubmit(onSubmit)}>
       <CardContent>
         <label htmlFor="file-input">
           <CardMedia
@@ -104,15 +104,14 @@ export default function CreateNFTCard () {
         />
         <TextField
           id="price-input"
-          label="Price"
+          label="Price (create first)"
           name="price"
           size="small"
           fullWidth
-          required
           margin="dense"
           type="number"
+          disabled
           inputProps={{ step: 'any' }}
-          {...register('price')}
         />
          <TextField
           id="description-input"

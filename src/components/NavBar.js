@@ -17,11 +17,7 @@ const pages = [
     href: '/'
   },
   {
-    title: 'Create',
-    href: '/create-item'
-  },
-  {
-    title: 'Created',
+    title: 'MY NFTs',
     href: '/creator-dashboard'
   }
 ]

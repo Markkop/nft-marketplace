@@ -9,8 +9,8 @@
     "test": "hardhat test",
     "node": "hardhat node",
     "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
-    "setup-marketplace:localhost": "hardhat run scripts/mintNFTsAndCreateMarketItems.js --network localhost",
-    "go": "npm run deploy:localhost && npm run setup-marketplace:localhost"
+    "setup-marketplace:localhost": "hardhat run scripts/setupMarket.js --network localhost",
+    "setup": "npm run deploy:localhost && npm run setup-marketplace:localhost"
   },
   "dependencies": {
     "@emotion/cache": "^11.7.1",

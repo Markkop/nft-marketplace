@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
 import { makeStyles } from '@mui/styles'
 import { NFTModalContext } from './providers/NFTModalProvider'
-import { useRouter } from 'next/router'
 import { Web3Context } from './providers/Web3Provider'
 import { ethers } from 'ethers'
 
@@ -33,9 +32,8 @@ const useStyles = makeStyles({
   }
 })
 
-export default function NFTCard ({ nft }) {
+export default function NFTCard ({ nft, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
-  const router = useRouter()
   const [price, setPrice] = useState(0)
   const classes = useStyles()
   const { name, description, image } = nft
@@ -56,7 +54,7 @@ export default function NFTCard ({ nft }) {
 
   async function onSell ({ nft }) {
     await sellNft(nft.tokenId, price)
-    router.reload(window.location.pathname)
+    updateNFT()
   }
 
   return (
