@@ -28,6 +28,6 @@ export default function CreatorDashboard () {
 
   if (loadingState === 'loaded' && !nfts.length) return (<h1>No NFTs created</h1>)
   return (
-    <NFTCardList nfts={nfts} setNfts={setNfts}/>
+    <NFTCardList nfts={nfts} setNfts={setNfts} withCreateNFT={true}/>
   )
 }

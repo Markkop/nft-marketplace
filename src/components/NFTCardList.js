@@ -22,7 +22,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default function NFTCardList ({ nfts, setNfts }) {
+export default function NFTCardList ({ nfts, setNfts, withCreateNFT }) {
   const classes = useStyles()
   const { account, marketplaceContract, nftContract } = useContext(Web3Context)
 
@@ -66,9 +66,9 @@ export default function NFTCardList ({ nfts, setNfts }) {
       loader={<LinearProgress />}
     >
       <Grid container className={classes.grid} id="grid">
-        <Grid item xs={12} sm={6} md={3} className={classes.gridItem}>
+        {withCreateNFT && <Grid item xs={12} sm={6} md={3} className={classes.gridItem}>
           <CreateNFTCard addNFTToList={addNFTToList}/>
-        </Grid>
+        </Grid>}
         {nfts.map((nft, i) =>
           <Fade in={true} key={i}>
             <Grid item xs={12} sm={6} md={3} className={classes.gridItem} >
