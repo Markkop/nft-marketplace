@@ -2,10 +2,11 @@ const axios = require('axios')
 const hre = require('hardhat')
 
 const vercelUrl = 'https://api.vercel.com'
+const { VERCEL_PROJECT_ID, VERCEL_DEPLOY_TOKEN } = process.env
 
 async function getProjectEnvironmentVariablesIds (...envNames) {
   try {
-    const { data: { envs } } = await axios.get(`${vercelUrl}/v8/projects/${process.env.VERCEL_PROJECT_ID}/env`, {
+    const { data: { envs } } = await axios.get(`${vercelUrl}/v8/projects/${VERCEL_PROJECT_ID}/env`, {
       headers: {
         Authorization: `Bearer ${process.env.VERCEL_TOKEN}`
       }
@@ -34,7 +35,7 @@ async function updateVercelEnviromentVariableByNames (...envNames) {
 }
 async function updateVercelEnviromentVariableById (id, newValue) {
   try {
-    await axios.patch(`${vercelUrl}/v8/projects/${process.env.VERCEL_PROJECT_ID}/env/${id}`, {
+    await axios.patch(`${vercelUrl}/v8/projects/${VERCEL_PROJECT_ID}/env/${id}`, {
       value: newValue
     }, {
       headers: {
@@ -46,9 +47,19 @@ async function updateVercelEnviromentVariableById (id, newValue) {
   }
 }
 
+async function triggerDeployment () {
+  try {
+    await axios.post(`${vercelUrl}/v1/integrations/deploy/${VERCEL_PROJECT_ID}/${VERCEL_DEPLOY_TOKEN}`)
+  } catch (error) {
+    console.log(error)
+    console.log(error.response.data)
+  }
+}
+
 async function main () {
   const networkName = hre.network.name.toUpperCase()
   await updateVercelEnviromentVariableByNames(`MARKETPLACE_CONTRACT_ADDRESS_${networkName}`, `NFT_CONTRACT_ADDRESS_${networkName}`)
+  await triggerDeployment()
 }
 
 main()
