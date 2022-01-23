@@ -1,5 +1,4 @@
 const hre = require('hardhat')
-const { MARKETPLACE_CONTRACT_ADDRESS, NFT_CONTRACT_ADDRESS } = process.env
 
 const dogsMetadataUrl = 'https://ipfs.io/ipfs/Qma1wY9HLfdWbRr1tDPpVCfbtPPvjnai1rEukuqSxk6PWb?filename=undefined'
 const techEventMetadataUrl = 'https://ipfs.io/ipfs/QmchRqWmRiHP2uXBGxT7sJJUJChDddHpyApoH94S3VkH42?filename=undefined'
@@ -13,7 +12,11 @@ async function getMintedTokenId (transaction) {
   return value.toNumber()
 }
 
-async function setupMarket (marketplaceAddress = MARKETPLACE_CONTRACT_ADDRESS, nftAddress = NFT_CONTRACT_ADDRESS) {
+async function setupMarket (marketplaceAddress, nftAddress) {
+  const networkName = hre.network.name.toUpperCase()
+  marketplaceAddress = marketplaceAddress || process.env[`MARKETPLACE_CONTRACT_ADDRESS_${networkName}`]
+  nftAddress = nftAddress || process.env[`NFT_CONTRACT_ADDRESS_${networkName}`]
+
   const marketplaceContract = await hre.ethers.getContractAt('Marketplace', marketplaceAddress)
   const nftContract = await hre.ethers.getContractAt('NFT', nftAddress)
   const nftContractAddress = nftContract.address

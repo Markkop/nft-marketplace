@@ -8,6 +8,7 @@ import axios from 'axios'
 const contextDefaultValues = {
   account: '',
   signer: null,
+  network: 'maticmum',
   isConnected: false,
   setAccount: () => {},
   connectWallet: () => {},
@@ -17,6 +18,10 @@ const contextDefaultValues = {
   isReady: false
 }
 
+const networkNames = {
+  maticmum: 'MUMBAI'
+}
+
 export const Web3Context = createContext(
   contextDefaultValues
 )
@@ -24,6 +29,7 @@ export const Web3Context = createContext(
 export default function NFTModalProvider ({ children }) {
   const [account, setAccount] = useState(contextDefaultValues.account)
   const [signer, setSigner] = useState(contextDefaultValues.signer)
+  const [network, setNetwork] = useState(contextDefaultValues.network)
   const [isConnected, setIsConnected] = useState(contextDefaultValues.isConnected)
   const [isReady, setIsReady] = useState(contextDefaultValues.isReady)
   const [marketplaceContract, setMarketplaceContract] = useState(contextDefaultValues.marketplaceContract)
@@ -34,8 +40,8 @@ export default function NFTModalProvider ({ children }) {
   }, [])
 
   async function initializeWeb3 () {
-    const signer = await connectWallet()
-    await setupContracts(signer)
+    const { signer, network } = await connectWallet()
+    await setupContracts(signer, network)
   }
 
   async function onAccountChange () {
@@ -54,11 +60,13 @@ export default function NFTModalProvider ({ children }) {
     setSigner(signer)
     const signerAddress = await signer.getAddress()
     setAccount(signerAddress)
-    return signer
+    const { name: network } = await provider.getNetwork()
+    setNetwork(network)
+    return { signer, network }
   }
 
-  async function setupContracts (signer) {
-    const { data } = await axios('/api/addresses')
+  async function setupContracts (signer, network) {
+    const { data } = await axios(`/api/addresses?network=${networkNames[network].toUpperCase()}`)
     const marketplaceContract = new ethers.Contract(data.marketplaceAddress, Market.abi, signer)
     setMarketplaceContract(marketplaceContract)
     const nftContract = new ethers.Contract(data.nftAddress, NFT.abi, signer)
@@ -77,7 +85,8 @@ export default function NFTModalProvider ({ children }) {
         connectWallet,
         marketplaceContract,
         nftContract,
-        isReady
+        isReady,
+        network
       }}
     >
       {children}
