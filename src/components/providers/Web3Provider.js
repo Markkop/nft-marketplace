@@ -19,7 +19,8 @@ const contextDefaultValues = {
 }
 
 const networkNames = {
-  maticmum: 'MUMBAI'
+  maticmum: 'MUMBAI',
+  unknown: 'LOCALHOST'
 }
 
 export const Web3Context = createContext(
@@ -40,8 +41,9 @@ export default function NFTModalProvider ({ children }) {
   }, [])
 
   async function initializeWeb3 () {
-    const { signer, network } = await connectWallet()
-    await setupContracts(signer, network)
+    const { signer, networkName } = await connectWallet()
+    if (!networkName) return
+    await setupContracts(signer, networkName)
   }
 
   async function onAccountChange () {
@@ -54,19 +56,21 @@ export default function NFTModalProvider ({ children }) {
   async function connectWallet () {
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
+    const provider = new ethers.providers.Web3Provider(connection, 'any')
     window.ethereum.on('accountsChanged', onAccountChange)
+    window.ethereum.on('chainChanged', initializeWeb3)
     const signer = provider.getSigner()
     setSigner(signer)
     const signerAddress = await signer.getAddress()
     setAccount(signerAddress)
     const { name: network } = await provider.getNetwork()
-    setNetwork(network)
-    return { signer, network }
+    const networkName = networkNames[network]
+    setNetwork(networkName)
+    return { signer, networkName }
   }
 
-  async function setupContracts (signer, network) {
-    const { data } = await axios(`/api/addresses?network=${networkNames[network].toUpperCase()}`)
+  async function setupContracts (signer, networkName) {
+    const { data } = await axios(`/api/addresses?network=${networkName}`)
     const marketplaceContract = new ethers.Contract(data.marketplaceAddress, Market.abi, signer)
     setMarketplaceContract(marketplaceContract)
     const nftContract = new ethers.Contract(data.nftAddress, NFT.abi, signer)
