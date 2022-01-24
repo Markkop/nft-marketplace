@@ -41,9 +41,9 @@ export default function Web3Provider ({ children }) {
       const web3Modal = new Web3Modal()
       const connection = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(connection, 'any')
+      await getAndSetWeb3Context(provider)
       connection.on('accountsChanged', (accounts) => getAndSetWeb3Context(provider, ethers.utils.getAddress(accounts[0])))
       connection.on('networkChanged', () => getAndSetWeb3Context(provider))
-      getAndSetWeb3Context(provider)
     } catch (error) {
       console.log(error)
     }
