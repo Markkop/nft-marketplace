@@ -6,13 +6,13 @@ import NFTModalProvider from '../providers/NFTModalProvider'
 import { Web3Context } from '../providers/Web3Provider'
 
 export default function BaseLayout ({ children }) {
-  const { network, balance } = useContext(Web3Context)
+  const { network, balance, isReady } = useContext(Web3Context)
   const isLowOnEther = balance < 0.1
   return (
     <>
       <NFTModalProvider>
         <NavBar/>
-        {network && isLowOnEther && <LowOnBalanceTip/>}
+        {isReady && network && isLowOnEther && <LowOnBalanceTip/>}
           {children}
         <NFTModal/>
       </NFTModalProvider>
