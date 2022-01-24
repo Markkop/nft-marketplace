@@ -41,7 +41,7 @@ export default function Web3Provider ({ children }) {
       const web3Modal = new Web3Modal()
       const connection = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(connection, 'any')
-      connection.on('accountsChanged', () => getAndSetWeb3Context(provider))
+      connection.on('accountsChanged', (accounts) => getAndSetWeb3Context(provider, ethers.utils.getAddress(accounts[0])))
       connection.on('networkChanged', () => getAndSetWeb3Context(provider))
       getAndSetWeb3Context(provider)
     } catch (error) {
@@ -49,12 +49,12 @@ export default function Web3Provider ({ children }) {
     }
   }
 
-  async function getAndSetWeb3Context (provider) {
+  async function getAndSetWeb3Context (provider, account) {
     if (!provider) return
     setIsReady(false)
     const signer = provider.getSigner()
     const signerAddress = await signer.getAddress()
-    setAccount(signerAddress)
+    setAccount(account || signerAddress)
     const signerBalance = await signer.getBalance()
     const balanceInEther = ethers.utils.formatEther(signerBalance, 'ether')
     setBalance(balanceInEther)
