@@ -41,8 +41,8 @@ export default function Web3Provider ({ children }) {
       const web3Modal = new Web3Modal()
       const connection = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(connection, 'any')
-      window.ethereum.on('accountsChanged', () => getAndSetWeb3Context(provider))
-      window.ethereum.on('chainChanged', () => getAndSetWeb3Context(provider))
+      connection.on('accountsChanged', () => getAndSetWeb3Context(provider))
+      connection.on('chainChanged', () => getAndSetWeb3Context(provider))
       getAndSetWeb3Context(provider)
     } catch (error) {
       console.log(error)
