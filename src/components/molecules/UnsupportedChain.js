@@ -52,16 +52,12 @@ async function addNetwork (chain, account) {
   window.ethereum.request({
     method: 'wallet_addEthereumChain',
     params: [params, account]
+  }).catch((error) => {
+    console.log(error)
   })
-    .then((result) => {
-      console.log(result)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
 }
 
-export default function NoChainSupported () {
+export default function UnsupportedChain () {
   const { account } = useContext(Web3Context)
 
   const renderProviderText = () => {

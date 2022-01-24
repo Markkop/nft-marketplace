@@ -39,7 +39,7 @@ export default function NFTCard ({ nft, updateNFT }) {
   const classes = useStyles()
   const { name, description, image } = nft
   const { nftContract, marketplaceContract } = useContext(Web3Context)
-  const priceLabel = nft.price ? `Price (last time sold for ${nft.price} ETH)` : 'Price'
+  const priceLabel = nft.price ? `Price (last time sold for ${nft.price} MATIC)` : 'Price'
 
   async function sellNft (nftTokenId, priceInEther) {
     const listingFee = await marketplaceContract.getListingFee()

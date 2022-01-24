@@ -22,7 +22,7 @@ const pages = [
   }
 ]
 
-const ResponsiveAppBar = () => {
+const NavBar = () => {
   const { account, connectWallet } = useContext(Web3Context)
   const { pathname } = useRouter()
   const logo = '🖼️'
@@ -66,4 +66,4 @@ const ResponsiveAppBar = () => {
     </AppBar>
   )
 }
-export default ResponsiveAppBar
+export default NavBar

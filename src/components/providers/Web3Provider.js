@@ -9,6 +9,7 @@ const contextDefaultValues = {
   account: '',
   signer: null,
   network: 'maticmum',
+  balance: 0,
   isConnected: false,
   setAccount: () => {},
   connectWallet: () => {},
@@ -27,10 +28,11 @@ export const Web3Context = createContext(
   contextDefaultValues
 )
 
-export default function NFTModalProvider ({ children }) {
+export default function Web3Provider ({ children }) {
   const [account, setAccount] = useState(contextDefaultValues.account)
   const [signer, setSigner] = useState(contextDefaultValues.signer)
   const [network, setNetwork] = useState(contextDefaultValues.network)
+  const [balance, setBalance] = useState(contextDefaultValues.balance)
   const [isConnected, setIsConnected] = useState(contextDefaultValues.isConnected)
   const [isReady, setIsReady] = useState(contextDefaultValues.isReady)
   const [marketplaceContract, setMarketplaceContract] = useState(contextDefaultValues.marketplaceContract)
@@ -63,6 +65,9 @@ export default function NFTModalProvider ({ children }) {
     setSigner(signer)
     const signerAddress = await signer.getAddress()
     setAccount(signerAddress)
+    const signerBalance = await signer.getBalance()
+    const balanceInEther = ethers.utils.formatEther(signerBalance, 'ether')
+    setBalance(balanceInEther)
     const { name: network } = await provider.getNetwork()
     const networkName = networkNames[network]
     setNetwork(networkName)
@@ -90,7 +95,8 @@ export default function NFTModalProvider ({ children }) {
         marketplaceContract,
         nftContract,
         isReady,
-        network
+        network,
+        balance
       }}
     >
       {children}

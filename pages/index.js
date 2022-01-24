@@ -5,7 +5,7 @@ import axios from 'axios'
 import NFTCardList from '../src/components/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
 import { LinearProgress } from '@mui/material'
-import NoChainSupported from '../src/components/molecules/NoChainSupported'
+import UnsupportedChain from '../src/components/molecules/UnsupportedChain'
 
 export default function Home () {
   const [nfts, setNfts] = useState([])
@@ -40,7 +40,7 @@ export default function Home () {
     setIsLoading(false)
   }
 
-  if (!network) return <NoChainSupported/>
+  if (!network) return <UnsupportedChain/>
   if (isLoading) return <LinearProgress/>
   if (!isLoading && !nfts.length) return <h1>No NFTs for sale</h1>
   return (

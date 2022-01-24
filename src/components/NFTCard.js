@@ -39,7 +39,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
   const { nftContract, marketplaceContract } = useContext(Web3Context)
   const isSold = action === 'none'
   const sellerAddressTitle = isSold ? 'Last sold by' : 'Seller'
-  const priceText = isSold ? `Last sold for ${price} ETH` : `${price} ETH`
+  const priceText = isSold ? `Last sold for ${price} MATIC` : `${price} MATIC`
 
   const actions = {
     buy: {
