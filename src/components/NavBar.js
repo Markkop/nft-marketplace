@@ -23,7 +23,7 @@ const pages = [
 ]
 
 const NavBar = () => {
-  const { account, connectWallet } = useContext(Web3Context)
+  const { account, initializeWeb3 } = useContext(Web3Context)
   const { pathname } = useRouter()
   const logo = '🖼️'
 
@@ -59,7 +59,7 @@ const NavBar = () => {
               )
             })}
           </Box>
-          {shortenAddress(account) || <Button color="inherit" onClick={() => connectWallet()}>Connect</Button> }
+          {shortenAddress(account) || <Button color="inherit" onClick={initializeWeb3}>Connect</Button> }
 
         </Toolbar>
       </Container>

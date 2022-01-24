@@ -10,13 +10,13 @@ import UnsupportedChain from '../src/components/molecules/UnsupportedChain'
 export default function Home () {
   const [nfts, setNfts] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const { account, marketplaceContract, nftContract, isReady, network } = useContext(Web3Context)
+  const { marketplaceContract, nftContract, isReady, network } = useContext(Web3Context)
 
   useEffect(() => {
     loadNFTs()
-  }, [account, network, isReady])
+  }, [isReady])
   async function loadNFTs () {
-    if (!isReady || !network) return <></>
+    if (!isReady) return
     const data = await marketplaceContract.fetchUnsoldMarketItems()
 
     const items = await Promise.all(data.map(async i => {

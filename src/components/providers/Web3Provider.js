@@ -7,13 +7,9 @@ import axios from 'axios'
 
 const contextDefaultValues = {
   account: '',
-  signer: null,
   network: 'maticmum',
   balance: 0,
-  isConnected: false,
-  setAccount: () => {},
   connectWallet: () => {},
-  setIsConnected: () => {},
   marketplaceContract: null,
   nftContract: null,
   isReady: false
@@ -30,39 +26,33 @@ export const Web3Context = createContext(
 
 export default function Web3Provider ({ children }) {
   const [account, setAccount] = useState(contextDefaultValues.account)
-  const [signer, setSigner] = useState(contextDefaultValues.signer)
   const [network, setNetwork] = useState(contextDefaultValues.network)
   const [balance, setBalance] = useState(contextDefaultValues.balance)
-  const [isConnected, setIsConnected] = useState(contextDefaultValues.isConnected)
-  const [isReady, setIsReady] = useState(contextDefaultValues.isReady)
   const [marketplaceContract, setMarketplaceContract] = useState(contextDefaultValues.marketplaceContract)
   const [nftContract, setNFTContract] = useState(contextDefaultValues.nftContract)
+  const [isReady, setIsReady] = useState(contextDefaultValues.isReady)
 
   useEffect(() => {
     initializeWeb3()
   }, [])
 
   async function initializeWeb3 () {
-    const { signer, networkName } = await connectWallet()
-    if (!networkName) return
-    await setupContracts(signer, networkName)
+    try {
+      const web3Modal = new Web3Modal()
+      const connection = await web3Modal.connect()
+      const provider = new ethers.providers.Web3Provider(connection, 'any')
+      window.ethereum.on('accountsChanged', () => getAndSetWeb3Context(provider))
+      window.ethereum.on('chainChanged', () => getAndSetWeb3Context(provider))
+      getAndSetWeb3Context(provider)
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  async function onAccountChange () {
-    const signer = await connectWallet()
-    setSigner(signer)
-    const signerAddress = await signer.getAddress()
-    setAccount(signerAddress)
-  }
-
-  async function connectWallet () {
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection, 'any')
-    window.ethereum.on('accountsChanged', onAccountChange)
-    window.ethereum.on('chainChanged', initializeWeb3)
+  async function getAndSetWeb3Context (provider) {
+    if (!provider) return
+    setIsReady(false)
     const signer = provider.getSigner()
-    setSigner(signer)
     const signerAddress = await signer.getAddress()
     setAccount(signerAddress)
     const signerBalance = await signer.getBalance()
@@ -71,32 +61,34 @@ export default function Web3Provider ({ children }) {
     const { name: network } = await provider.getNetwork()
     const networkName = networkNames[network]
     setNetwork(networkName)
-    return { signer, networkName }
+    const success = await setupContracts(signer, networkName)
+    setIsReady(success)
   }
 
   async function setupContracts (signer, networkName) {
+    if (!networkName) {
+      setMarketplaceContract(null)
+      setNFTContract(null)
+      return false
+    }
     const { data } = await axios(`/api/addresses?network=${networkName}`)
     const marketplaceContract = new ethers.Contract(data.marketplaceAddress, Market.abi, signer)
     setMarketplaceContract(marketplaceContract)
     const nftContract = new ethers.Contract(data.nftAddress, NFT.abi, signer)
     setNFTContract(nftContract)
-    setIsReady(true)
+    return true
   }
 
   return (
     <Web3Context.Provider
       value={{
         account,
-        signer,
-        isConnected,
-        setAccount,
-        setIsConnected,
-        connectWallet,
         marketplaceContract,
         nftContract,
         isReady,
         network,
-        balance
+        balance,
+        initializeWeb3
       }}
     >
       {children}
