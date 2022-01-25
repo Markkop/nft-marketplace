@@ -38,24 +38,34 @@ export default function Web3Provider ({ children }) {
 
   async function initializeWeb3 () {
     try {
+      let onAccountsChangedCooldown = false
       const web3Modal = new Web3Modal()
       const connection = await web3Modal.connect()
       const provider = new ethers.providers.Web3Provider(connection, 'any')
       await getAndSetWeb3Context(provider)
-      connection.on('accountsChanged', (accounts) => getAndSetWeb3Context(provider, ethers.utils.getAddress(accounts[0])))
-      connection.on('networkChanged', () => getAndSetWeb3Context(provider))
+
+      function onAccountsChanged (accounts) {
+        // Workaround to accountsChanged metamask mobile bug
+        if (onAccountsChangedCooldown) return
+        onAccountsChangedCooldown = true
+        setTimeout(() => { onAccountsChangedCooldown = false }, 1000)
+        return getAndSetWeb3Context(provider, ethers.utils.getAddress(accounts[0]))
+      }
+
+      connection.on('accountsChanged', onAccountsChanged)
     } catch (error) {
       console.log(error)
     }
   }
 
-  async function getAndSetWeb3Context (provider, account) {
+  async function getAndSetWeb3Context (provider, changedAccount) {
     if (!provider) return
     setIsReady(false)
     const signer = provider.getSigner()
     const signerAddress = await signer.getAddress()
-    setAccount(account || signerAddress)
-    const signerBalance = await signer.getBalance()
+    const address = changedAccount || signerAddress
+    setAccount(address)
+    const signerBalance = await provider.getBalance(address)
     const balanceInEther = ethers.utils.formatEther(signerBalance, 'ether')
     setBalance(balanceInEther)
     const { name: network } = await provider.getNetwork()
