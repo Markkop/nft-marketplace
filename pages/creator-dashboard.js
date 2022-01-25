@@ -1,6 +1,6 @@
 import { LinearProgress } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
-import InstallMetamask from '../src/components/molecules/installMetamask'
+import InstallMetamask from '../src/components/molecules/InstallMetamask'
 import NFTCardList from '../src/components/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
 import { getNFTById } from '../src/utils/nft'
