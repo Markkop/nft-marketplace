@@ -12,7 +12,8 @@ const contextDefaultValues = {
   connectWallet: () => {},
   marketplaceContract: null,
   nftContract: null,
-  isReady: false
+  isReady: false,
+  hasWeb3: false
 }
 
 const networkNames = {
@@ -25,6 +26,7 @@ export const Web3Context = createContext(
 )
 
 export default function Web3Provider ({ children }) {
+  const [hasWeb3, setHasWeb3] = useState(contextDefaultValues.hasWeb3)
   const [account, setAccount] = useState(contextDefaultValues.account)
   const [network, setNetwork] = useState(contextDefaultValues.network)
   const [balance, setBalance] = useState(contextDefaultValues.balance)
@@ -36,43 +38,71 @@ export default function Web3Provider ({ children }) {
     initializeWeb3()
   }, [])
 
+  async function initializeWeb3WithoutSigner () {
+    const alchemyProvider = new ethers.providers.AlchemyProvider(80001)
+    setHasWeb3(false)
+    await getAndSetWeb3ContextWithoutSigner(alchemyProvider)
+  }
+
   async function initializeWeb3 () {
     try {
+      if (!window.ethereum) {
+        await initializeWeb3WithoutSigner()
+        return
+      }
+
       let onAccountsChangedCooldown = false
       const web3Modal = new Web3Modal()
       const connection = await web3Modal.connect()
+      setHasWeb3(true)
       const provider = new ethers.providers.Web3Provider(connection, 'any')
-      await getAndSetWeb3Context(provider)
+      await getAndSetWeb3ContextWithSigner(provider)
 
       function onAccountsChanged (accounts) {
         // Workaround to accountsChanged metamask mobile bug
         if (onAccountsChangedCooldown) return
         onAccountsChangedCooldown = true
         setTimeout(() => { onAccountsChangedCooldown = false }, 1000)
-        return getAndSetWeb3Context(provider, ethers.utils.getAddress(accounts[0]))
+        const changedAddress = ethers.utils.getAddress(accounts[0])
+        return getAndSetAccountAndBalance(provider, changedAddress)
       }
 
       connection.on('accountsChanged', onAccountsChanged)
     } catch (error) {
+      initializeWeb3WithoutSigner()
       console.log(error)
     }
   }
 
-  async function getAndSetWeb3Context (provider, changedAccount) {
-    if (!provider) return
+  async function getAndSetWeb3ContextWithSigner (provider) {
     setIsReady(false)
     const signer = provider.getSigner()
     const signerAddress = await signer.getAddress()
-    const address = changedAccount || signerAddress
+    await getAndSetAccountAndBalance(provider, signerAddress)
+    const networkName = await getAndSetNetwork(provider)
+    const success = await setupContracts(signer, networkName)
+    setIsReady(success)
+  }
+
+  async function getAndSetWeb3ContextWithoutSigner (provider) {
+    setIsReady(false)
+    const networkName = await getAndSetNetwork(provider)
+    const success = await setupContracts(provider, networkName)
+    setIsReady(success)
+  }
+
+  async function getAndSetAccountAndBalance (provider, address) {
     setAccount(address)
     const signerBalance = await provider.getBalance(address)
     const balanceInEther = ethers.utils.formatEther(signerBalance, 'ether')
     setBalance(balanceInEther)
+  }
+
+  async function getAndSetNetwork (provider) {
     const { name: network } = await provider.getNetwork()
     const networkName = networkNames[network]
     setNetwork(networkName)
-    const success = await setupContracts(signer, networkName)
-    setIsReady(success)
+    return networkName
   }
 
   async function setupContracts (signer, networkName) {
@@ -98,7 +128,8 @@ export default function Web3Provider ({ children }) {
         isReady,
         network,
         balance,
-        initializeWeb3
+        initializeWeb3,
+        hasWeb3
       }}
     >
       {children}

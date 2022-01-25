@@ -34,9 +34,9 @@ const useStyles = makeStyles({
 
 export default function NFTCard ({ nft, action, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
+  const { nftContract, marketplaceContract, hasWeb3 } = useContext(Web3Context)
   const classes = useStyles()
   const { name, description, image, price } = nft
-  const { nftContract, marketplaceContract } = useContext(Web3Context)
   const isSold = action === 'none'
   const sellerAddressTitle = isSold ? 'Last sold by' : 'Seller'
   const priceText = isSold ? `Last sold for ${price} MATIC` : `${price} MATIC`
@@ -72,7 +72,6 @@ export default function NFTCard ({ nft, action, updateNFT }) {
 
   async function onClick ({ nft }) {
     await actions[action].method(nft)
-    // router.reload(window.location.pathname)
   }
 
   return (
@@ -98,7 +97,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
         <CardAddress title={sellerAddressTitle} address={nft.seller} />
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={() => onClick({ nft })}>{actions[action].text}</Button>
+        <Button size="small" onClick={() => onClick({ nft })}>{hasWeb3 && actions[action].text}</Button>
       </CardActions>
     </Card>
   )

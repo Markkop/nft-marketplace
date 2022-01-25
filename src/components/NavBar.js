@@ -6,10 +6,9 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
 import Button from '@mui/material/Button'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
 import { Web3Context } from './providers/Web3Provider'
 import { shortenAddress } from '../utils/format'
+import NavItem from './NavItem'
 
 const pages = [
   {
@@ -24,8 +23,16 @@ const pages = [
 
 const NavBar = () => {
   const { account, initializeWeb3 } = useContext(Web3Context)
-  const { pathname } = useRouter()
   const logo = '🖼️'
+
+  const buttonText = typeof window !== 'undefined' && window.ethereum ? 'Connect' : 'Download Metamask'
+  const onClick = () => {
+    if (window.ethereum) {
+      return initializeWeb3()
+    }
+
+    return window.open('https://metamask.io/', '_blank')
+  }
 
   return (
     <AppBar position="static">
@@ -35,31 +42,14 @@ const NavBar = () => {
             variant="h3"
             noWrap
             component="div"
-            sx={{ flexGrow: { xs: 1, md: 0 }, display: 'flex' }}
+            sx={{ p: '10px', flexGrow: { xs: 1, md: 0 }, display: 'flex' }}
           >
             {logo}
           </Typography>
           <Box sx={{ flexGrow: 1, display: 'flex' }}>
-            {pages.map(({ title, href }) => {
-              const isActive = pathname === href
-              return (
-              <Button
-                key={title}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                <Link href={href} >
-                  <a style={{
-                    textDecoration: !isActive && 'none',
-                    color: 'white'
-                  }}>
-                    {title}
-                  </a>
-                </Link>
-              </Button>
-              )
-            })}
+            {pages.map(({ title, href }) => <NavItem title={title} href={href} key={title}/>)}
           </Box>
-          {shortenAddress(account) || <Button color="inherit" onClick={initializeWeb3}>Connect</Button> }
+          {shortenAddress(account) || <Button color="inherit" onClick={onClick}>{buttonText}</Button> }
 
         </Toolbar>
       </Container>

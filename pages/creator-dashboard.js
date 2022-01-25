@@ -1,12 +1,13 @@
 import { LinearProgress } from '@mui/material'
 import { useContext, useEffect, useState } from 'react'
+import InstallMetamask from '../src/components/molecules/installMetamask'
 import NFTCardList from '../src/components/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
 import { getNFTById } from '../src/utils/nft'
 
 export default function CreatorDashboard () {
   const [nfts, setNfts] = useState([])
-  const { account, marketplaceContract, nftContract, isReady } = useContext(Web3Context)
+  const { account, marketplaceContract, nftContract, isReady, hasWeb3 } = useContext(Web3Context)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -14,7 +15,7 @@ export default function CreatorDashboard () {
   }, [account, isReady])
 
   async function loadNFTs () {
-    if (!isReady) return <></>
+    if (!isReady || !hasWeb3) return <></>
     const nftIdsCreatedByMe = await nftContract.getTokensCreatedByMe()
     const nftIdsOwnedByMe = await nftContract.getTokensOwnedByMe()
     const myNftIds = [...nftIdsCreatedByMe, ...nftIdsOwnedByMe]
@@ -27,6 +28,7 @@ export default function CreatorDashboard () {
     setIsLoading(false)
   }
 
+  if (!hasWeb3) return <InstallMetamask/>
   if (isLoading) return <LinearProgress/>
 
   return (

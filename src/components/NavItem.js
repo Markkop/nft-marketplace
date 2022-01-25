@@ -1,13 +1,29 @@
 import PropTypes from 'prop-types'
 import Link from 'next/link'
+import { Button } from '@mui/material'
+import { useRouter } from 'next/router'
 
 export default function NavItem ({ title, href }) {
+  const { pathname } = useRouter()
+  const isActive = pathname === href
   return (
-    <Link href={href} className="navbar-item">
-      <a className="mr-4 text-pink-500">
-        {title}
-      </a>
-    </Link>
+      <Link href={href} key={title} passHref>
+        <Button
+          component="a"
+          sx={{
+            my: 2,
+            color: 'white',
+            display: 'block',
+            textDecoration: isActive && 'underline',
+            '&:hover': {
+              backgroundColor: '#fff',
+              color: '#3c52b2'
+            }
+          }}
+        >
+          {title}
+        </Button>
+      </Link>
   )
 }
 
