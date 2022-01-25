@@ -1,16 +1,14 @@
 
-import { useContext } from 'react'
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import { makeStyles } from '@mui/styles'
-import { NFTModalContext } from './providers/NFTModalProvider'
-import CardAddress from './atoms/CardAddress'
-import { Web3Context } from './providers/Web3Provider'
 import { ethers } from 'ethers'
+import { useContext } from 'react'
+import { makeStyles } from '@mui/styles'
+import { Card, CardActions, CardContent, CardMedia, Button } from '@mui/material'
+import { NFTModalContext } from '../providers/NFTModalProvider'
+import { Web3Context } from '../providers/Web3Provider'
+import CardAddress from '../atoms/CardAddress'
+import NFTDescription from '../atoms/NFTDescription'
+import NFTPrice from '../atoms/NFTPrice'
+import NFTName from '../atoms/NFTName'
 
 const useStyles = makeStyles({
   root: {
@@ -39,7 +37,6 @@ export default function NFTCard ({ nft, action, updateNFT }) {
   const { name, description, image, price } = nft
   const isSold = action === 'none'
   const sellerAddressTitle = isSold ? 'Last sold by' : 'Seller'
-  const priceText = isSold ? `Last sold for ${price} MATIC` : `${price} MATIC`
 
   const actions = {
     buy: {
@@ -83,15 +80,9 @@ export default function NFTCard ({ nft, action, updateNFT }) {
           image={image}
           component="a" onClick={handleCardImageClick}
         />
-        <Typography gutterBottom variant="h5" component="div">
-          {name}
-        </Typography>
-        <Typography gutterBottom variant="h6" component="div">
-        {priceText}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
+        <NFTName name={name}/>
+        <NFTPrice price={price} isSold={isSold}/>
+        <NFTDescription description={description} />
         <CardAddress title="Creator" address={nft.creator} />
         <CardAddress title="Owner" address={nft.owner} />
         <CardAddress title={sellerAddressTitle} address={nft.seller} />

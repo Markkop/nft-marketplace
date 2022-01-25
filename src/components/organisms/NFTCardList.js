@@ -3,13 +3,13 @@ import Grid from '@mui/material/Grid'
 import LinearProgress from '@mui/material/LinearProgress'
 import Fade from '@mui/material/Fade'
 import { makeStyles } from '@mui/styles'
-import NFTCard from './NFTCard'
-import CreateNFTCard from './CreateNFTCard'
-import SellNFTCard from './SellNFTCard'
+import NFTCard from '../molecules/NFTCard'
+import CreateNFTCard from '../molecules/CreateNFTCard'
+import SellNFTCard from '../molecules/SellNFTCard'
 import { ethers } from 'ethers'
-import { Web3Context } from './providers/Web3Provider'
+import { Web3Context } from '../providers/Web3Provider'
 import { useContext } from 'react'
-import { getNFTById } from '../utils/nft'
+import { getNFTById } from '../../utils/nft'
 
 const useStyles = makeStyles({
   grid: {

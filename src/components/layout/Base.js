@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import LowOnBalanceTip from '../molecules/LowOnBalanceTip'
-import NavBar from '../NavBar'
-import NFTModal from '../NFTModal'
+import NavBar from '../molecules/NavBar'
+import NFTModal from '../organisms/NFTModal'
 import NFTModalProvider from '../providers/NFTModalProvider'
 import { Web3Context } from '../providers/Web3Provider'
 

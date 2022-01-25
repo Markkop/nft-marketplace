@@ -1,8 +1,7 @@
 import { ethers } from 'ethers'
 import { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
-
-import NFTCardList from '../src/components/NFTCardList'
+import NFTCardList from '../src/components/organisms/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
 import { LinearProgress } from '@mui/material'
 import UnsupportedChain from '../src/components/molecules/UnsupportedChain'

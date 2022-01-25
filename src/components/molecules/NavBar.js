@@ -5,10 +5,10 @@ import Box from '@mui/material/Box'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import Container from '@mui/material/Container'
-import Button from '@mui/material/Button'
-import { Web3Context } from './providers/Web3Provider'
-import { shortenAddress } from '../utils/format'
-import NavItem from './NavItem'
+import { Web3Context } from '../providers/Web3Provider'
+import NavItem from '../atoms/NavItem'
+import ConnectedAccountAddress from '../atoms/ConnectedAccountAddress'
+import ConnectButton from '../atoms/ConnectButton'
 
 const pages = [
   {
@@ -22,17 +22,8 @@ const pages = [
 ]
 
 const NavBar = () => {
-  const { account, initializeWeb3, hasWeb3 } = useContext(Web3Context)
+  const { account } = useContext(Web3Context)
   const logo = '🖼️'
-
-  const buttonText = hasWeb3 ? 'Connect' : 'Download Metamask'
-  const onClick = () => {
-    if (hasWeb3) {
-      return initializeWeb3()
-    }
-
-    return window.open('https://metamask.io/', '_blank')
-  }
 
   return (
     <AppBar position="static">
@@ -49,7 +40,7 @@ const NavBar = () => {
           <Box sx={{ flexGrow: 1, display: 'flex' }}>
             {pages.map(({ title, href }) => <NavItem title={title} href={href} key={title}/>)}
           </Box>
-          {shortenAddress(account) || <Button color="inherit" onClick={onClick}>{buttonText}</Button> }
+          {account ? <ConnectedAccountAddress account={account}/> : <ConnectButton />}
 
         </Toolbar>
       </Container>

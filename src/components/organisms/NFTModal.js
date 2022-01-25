@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { NFTModalContext } from './providers/NFTModalProvider'
+import { NFTModalContext } from '../providers/NFTModalProvider'
 import Fade from '@mui/material/Fade'
 import Modal from '@mui/material/Modal'
 import Backdrop from '@mui/material/Backdrop'

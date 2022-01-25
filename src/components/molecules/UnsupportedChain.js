@@ -1,39 +1,10 @@
 import { Box, Button, Container, Typography } from '@mui/material'
 import { useContext } from 'react'
-import { getProvider } from '../../utils/web3'
+import { getProvider, chains } from '../../utils/web3'
 import { Web3Context } from '../providers/Web3Provider'
 
 const toHex = (num) => {
   return '0x' + num.toString(16)
-}
-
-const chains = {
-  polygonMumbaiTestnet: {
-    name: 'Polygon Testnet Mumbai',
-    chain: 'Polygon',
-    rpc: [
-      'https://matic-mumbai.chainstacklabs.com',
-      'https://rpc-mumbai.maticvigil.com',
-      'https://matic-testnet-archive-rpc.bwarelabs.com'
-    ],
-    faucets: [
-      'https://faucet.polygon.technology/'
-    ],
-    nativeCurrency: {
-      name: 'MATIC',
-      symbol: 'MATIC',
-      decimals: 18
-    },
-    infoURL: 'https://polygon.technology/',
-    shortName: 'maticmum',
-    chainId: 80001,
-    networkId: 80001,
-    explorers: [{
-      name: 'polygonscan',
-      url: 'https://mumbai.polygonscan.com',
-      standard: 'EIP3091'
-    }]
-  }
 }
 
 async function addNetwork (chain, account) {

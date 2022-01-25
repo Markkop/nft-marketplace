@@ -1,15 +1,11 @@
 
 import { useContext, useState } from 'react'
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import { makeStyles } from '@mui/styles'
-import axios from 'axios'
 import { useForm } from 'react-hook-form'
-import { Web3Context } from './providers/Web3Provider'
+import { makeStyles } from '@mui/styles'
+import { TextField, Card, CardActions, CardContent, CardMedia, Button } from '@mui/material'
+import axios from 'axios'
+import { Web3Context } from '../providers/Web3Provider'
+import PriceTextField from '../atoms/PriceTextField'
 
 const useStyles = makeStyles({
   root: {
@@ -102,21 +98,11 @@ export default function CreateNFTCard ({ addNFTToList }) {
           margin="dense"
           {...register('name')}
         />
-        <TextField
-          id="price-input"
-          label="Price (create first)"
-          name="price"
-          size="small"
-          fullWidth
-          margin="dense"
-          type="number"
-          disabled
-          inputProps={{ step: 'any' }}
-        />
+        <PriceTextField label={'Price (create first)'} disabled={true}/>
          <TextField
           id="description-input"
           label="Description"
-          description="description"
+          name="description"
           size="small"
           multiline
           rows={2}

@@ -1,17 +1,14 @@
 
-import { useState, useContext } from 'react'
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardContent from '@mui/material/CardContent'
-import CardMedia from '@mui/material/CardMedia'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import { makeStyles } from '@mui/styles'
-import { NFTModalContext } from './providers/NFTModalProvider'
-import { Web3Context } from './providers/Web3Provider'
 import { ethers } from 'ethers'
-import CardAddress from './atoms/CardAddress'
+import { useContext, useState } from 'react'
+import { makeStyles } from '@mui/styles'
+import { Card, CardActions, CardContent, CardMedia, Button } from '@mui/material'
+import { NFTModalContext } from '../providers/NFTModalProvider'
+import { Web3Context } from '../providers/Web3Provider'
+import CardAddress from '../atoms/CardAddress'
+import NFTName from '../atoms/NFTName'
+import NFTDescription from '../atoms/NFTDescription'
+import PriceTextField from '../atoms/PriceTextField'
 
 const useStyles = makeStyles({
   root: {
@@ -68,24 +65,9 @@ export default function NFTCard ({ nft, updateNFT }) {
           image={image}
           component="a" onClick={handleCardImageClick}
         />
-        <Typography gutterBottom variant="h5" component="div">
-          {name}
-        </Typography>
-        <TextField
-          id="price-input"
-          label={priceLabel}
-          name="price"
-          size="small"
-          fullWidth
-          required
-          margin="dense"
-          type="number"
-          inputProps={{ step: 'any' }}
-          onChange={e => setPrice(e.target.value)}
-        />
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
+        <NFTName name={name}/>
+        <PriceTextField label={priceLabel} onChange={e => setPrice(e.target.value)}/>
+        <NFTDescription description={description} />
         <CardAddress title="Creator" address={nft.creator} />
         <CardAddress title="Owner" address={nft.owner} />
         {nft.seller && <CardAddress title="Last sold by" address={nft.seller} />}
