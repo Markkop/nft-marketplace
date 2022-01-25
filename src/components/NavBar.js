@@ -22,12 +22,12 @@ const pages = [
 ]
 
 const NavBar = () => {
-  const { account, initializeWeb3 } = useContext(Web3Context)
+  const { account, initializeWeb3, hasWeb3 } = useContext(Web3Context)
   const logo = '🖼️'
 
-  const buttonText = typeof window !== 'undefined' && window.ethereum ? 'Connect' : 'Download Metamask'
+  const buttonText = hasWeb3 ? 'Connect' : 'Download Metamask'
   const onClick = () => {
-    if (window.ethereum) {
+    if (hasWeb3) {
       return initializeWeb3()
     }
 
