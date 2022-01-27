@@ -4,23 +4,25 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Fade from '@mui/material/Fade'
 import { makeStyles } from '@mui/styles'
 import NFTCard from '../molecules/NFTCard'
-import CreateNFTCard from '../molecules/CreateNFTCard'
-import SellNFTCard from '../molecules/SellNFTCard'
+import NFTCardCreation from '../molecules/NFTCardCreation'
 import { ethers } from 'ethers'
 import { Web3Context } from '../providers/Web3Provider'
 import { useContext } from 'react'
 import { getNFTById } from '../../utils/nft'
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   grid: {
     spacing: 3,
-    alignItems: 'stretch'
+    alignItems: 'center'
   },
   gridItem: {
     display: 'flex',
-    transition: 'all .3s'
+    transition: 'all .3s',
+    [theme.breakpoints.down('sm')]: {
+      margin: '0 20px'
+    }
   }
-})
+}))
 
 export default function NFTCardList ({ nfts, setNfts, withCreateNFT }) {
   const classes = useStyles()
@@ -42,19 +44,19 @@ export default function NFTCardList ({ nfts, setNfts, withCreateNFT }) {
 
   function NFT ({ nft, index }) {
     if (!nft.owner) {
-      return <CreateNFTCard addNFTToList={addNFTToList}/>
+      return <NFTCardCreation addNFTToList={addNFTToList}/>
     }
 
     if (nft.owner === account) {
-      return <SellNFTCard nft={nft} updateNFT={() => updateNFT(index, nft.tokenId)}/>
+      return <NFTCard nft={nft} action="sell" updateNFT={() => updateNFT(index, nft.tokenId)}/>
     }
 
     if (nft.seller === account && !nft.sold) {
-      return <NFTCard nft={nft} updateNFT={() => updateNFT(index, nft.tokenId)} action="cancel"/>
+      return <NFTCard nft={nft} action="cancel" updateNFT={() => updateNFT(index, nft.tokenId)} />
     }
 
     if (nft.owner === ethers.constants.AddressZero) {
-      return <NFTCard nft={nft} updateNFT={() => updateNFT(index, nft.tokenId)} action="buy"/>
+      return <NFTCard nft={nft} action="buy" updateNFT={() => updateNFT(index, nft.tokenId)} />
     }
 
     return <NFTCard nft={nft} action="none"/>
@@ -67,7 +69,7 @@ export default function NFTCardList ({ nfts, setNfts, withCreateNFT }) {
     >
       <Grid container className={classes.grid} id="grid">
         {withCreateNFT && <Grid item xs={12} sm={6} md={3} className={classes.gridItem}>
-          <CreateNFTCard addNFTToList={addNFTToList}/>
+          <NFTCardCreation addNFTToList={addNFTToList}/>
         </Grid>}
         {nfts.map((nft, i) =>
           <Fade in={true} key={i}>

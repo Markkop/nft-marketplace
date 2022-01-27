@@ -5,7 +5,6 @@ import { makeStyles } from '@mui/styles'
 import { TextField, Card, CardActions, CardContent, CardMedia, Button } from '@mui/material'
 import axios from 'axios'
 import { Web3Context } from '../providers/Web3Provider'
-import PriceTextField from '../atoms/PriceTextField'
 
 const useStyles = makeStyles({
   root: {
@@ -14,11 +13,8 @@ const useStyles = makeStyles({
     margin: '15px 15px',
     flexGrow: 1
   },
-  title: {
-    fontSize: 14
-  },
-  pos: {
-    marginBottom: 12
+  cardActions: {
+    marginTop: 'auto'
   },
   media: {
     height: 0,
@@ -27,7 +23,7 @@ const useStyles = makeStyles({
   }
 })
 
-export default function CreateNFTCard ({ addNFTToList }) {
+export default function NFTCardCreation ({ addNFTToList }) {
   const [file, setFile] = useState(null)
   const [fileUrl, setFileUrl] = useState('https://miro.medium.com/max/250/1*DSNfSDcOe33E2Aup1Sww2w.jpeg')
   const classes = useStyles()
@@ -73,21 +69,21 @@ export default function CreateNFTCard ({ addNFTToList }) {
 
   return (
     <Card className={classes.root} component="form" sx={{ maxWidth: 345 }} onSubmit={handleSubmit(onSubmit)}>
-      <CardContent>
-        <label htmlFor="file-input">
-          <CardMedia
-            className={classes.media}
-            alt='Upload image'
-            image={fileUrl}
-          />
-        </label>
-        <input
-            style={{ display: 'none' }}
-            type="file"
-            name="file"
-            id="file-input"
-            onChange={onFileChange}
-          />
+      <label htmlFor="file-input">
+        <CardMedia
+          className={classes.media}
+          alt='Upload image'
+          image={fileUrl}
+        />
+      </label>
+      <input
+          style={{ display: 'none' }}
+          type="file"
+          name="file"
+          id="file-input"
+          onChange={onFileChange}
+        />
+      <CardContent sx={{ paddingBottom: 0 }}>
         <TextField
           id="name-input"
           label="Name"
@@ -98,7 +94,6 @@ export default function CreateNFTCard ({ addNFTToList }) {
           margin="dense"
           {...register('name')}
         />
-        <PriceTextField label={'Price (create first)'} disabled={true}/>
          <TextField
           id="description-input"
           label="Description"
@@ -112,7 +107,7 @@ export default function CreateNFTCard ({ addNFTToList }) {
           {...register('description')}
         />
       </CardContent>
-      <CardActions>
+      <CardActions className={classes.cardActions}>
         <Button size="small" type="submit">Create</Button>
       </CardActions>
     </Card>
