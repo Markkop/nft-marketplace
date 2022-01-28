@@ -11,11 +11,12 @@ export default function NavItem ({ title, href, openNewTab }) {
         <Button
           component="a"
           target={openNewTab && '_blank'}
-          sx={{
-            my: 2,
+          style={{
+            margin: 'auto 0',
             color: 'white',
             display: 'block',
             textDecoration: isActive && 'underline',
+            textAlign: 'center',
             '&:hover': {
               backgroundColor: '#fff',
               color: '#3c52b2'

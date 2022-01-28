@@ -41,7 +41,6 @@ const NavBar = () => {
             {pages.map(({ title, href }) => <NavItem title={title} href={href} key={title}/>)}
           </Box>
           {account ? <ConnectedAccountAddress account={account}/> : <ConnectButton />}
-
         </Toolbar>
       </Container>
     </AppBar>
