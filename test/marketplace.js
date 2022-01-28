@@ -47,6 +47,7 @@ describe('Marketplace', function () {
         owner.address,
         ethers.constants.AddressZero,
         price,
+        false,
         false
       )
   })
@@ -76,6 +77,43 @@ describe('Marketplace', function () {
     // Assert
     const tokenOwner = await nftContract.ownerOf(token1id)
     expect(tokenOwner).to.eql(owner.address)
+  })
+
+  it('cancels a market item', async () => {
+    // Arrange
+    const tokenId = 1
+    const price = ethers.utils.parseEther('1')
+    const listingFee = await marketplaceContract.getListingFee()
+    const transactionOptions = { value: listingFee }
+
+    await mintTokenAndCreateMarketItem(tokenId, price, transactionOptions)
+
+    // Act
+    await marketplaceContract.cancelMarketItem(nftContractAddress, 1)
+
+    // Assert
+    const tokenOwner = await nftContract.ownerOf(1)
+    expect(tokenOwner).to.eql(owner.address)
+  })
+
+  it('reverts when trying to cancel an inexistent market item', async () => {
+    // Act and Assert
+    expect(marketplaceContract.cancelMarketItem(nftContractAddress, 1))
+      .to.be.revertedWith('Market item has to exist')
+  })
+
+  it('reverts when trying to cancel a market item whose seller is not msg.sender', async () => {
+    // Arrange
+    const tokenId = 1
+    const price = ethers.utils.parseEther('1')
+    const listingFee = await marketplaceContract.getListingFee()
+    const transactionOptions = { value: listingFee }
+
+    await mintTokenAndCreateMarketItem(tokenId, price, transactionOptions)
+
+    // Act and Assert
+    expect(marketplaceContract.connect(buyer).cancelMarketItem(nftContractAddress, 1))
+      .to.be.revertedWith('You are not the seller')
   })
 
   it('gets latest Market Item by the token id', async function () {
@@ -111,6 +149,7 @@ describe('Marketplace', function () {
       buyer.address,
       ethers.constants.AddressZero,
       price,
+      false,
       false
     ]
     expect(marketItemResult).to.eql([marketItem, true])
@@ -132,6 +171,7 @@ describe('Marketplace', function () {
       ethers.constants.AddressZero,
       ethers.constants.AddressZero,
       BigNumber.from(0),
+      false,
       false
     ]
     expect(marketItemResult).to.eql([emptyMarketItem, false])

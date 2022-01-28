@@ -17,6 +17,7 @@ export async function getNFTById (nftContract, marketplaceContract, account, nft
       seller: marketItem.seller,
       owner: marketItem.owner,
       sold: marketItem.sold,
+      canceled: marketItem.canceled,
       image: metadata.image,
       name: metadata.name,
       description: metadata.description
@@ -31,6 +32,7 @@ export async function getNFTById (nftContract, marketplaceContract, account, nft
     seller: null,
     owner: account,
     sold: false,
+    canceled: false,
     image: metadata.image,
     name: metadata.name,
     description: metadata.description

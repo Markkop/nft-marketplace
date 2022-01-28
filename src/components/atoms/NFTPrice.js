@@ -2,8 +2,21 @@ import { Popover, Typography } from '@mui/material'
 import Image from 'next/image'
 import { useState } from 'react'
 
-export default function NFTPrice ({ price, isSold }) {
-  const priceText = isSold ? `Last sold for ${price} MATIC` : `${price}`
+function getPriceText (nft) {
+  const { sold, canceled } = nft
+  if (sold) {
+    return 'Sold for'
+  }
+
+  if (canceled) {
+    return 'Offered for'
+  }
+
+  return 'Price'
+}
+
+export default function NFTPrice ({ nft }) {
+  const priceText = getPriceText(nft)
   const [anchorEl, setAnchorEl] = useState(null)
 
   const handlePopoverOpen = (event) => {
@@ -22,7 +35,7 @@ export default function NFTPrice ({ price, isSold }) {
       variant="h6"
       color="text.secondary"
       >
-        Price
+        {priceText}
       </Typography>
       <Typography
       gutterBottom
@@ -59,7 +72,7 @@ export default function NFTPrice ({ price, isSold }) {
         >
           <Typography sx={{ p: 1 }}>Matic</Typography>
         </Popover>
-        {' '}{priceText}
+        {' '}{nft.price}
       </Typography>
     </div>
   )

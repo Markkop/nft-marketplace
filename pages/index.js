@@ -18,6 +18,7 @@ export default function Home () {
     if (!isReady) return
     const data = await marketplaceContract.fetchUnsoldMarketItems()
 
+    console.log(data)
     const items = await Promise.all(data.map(async i => {
       const tokenUri = await nftContract.tokenURI(i.tokenId)
       const meta = await axios.get(tokenUri)

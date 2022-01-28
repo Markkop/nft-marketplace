@@ -62,9 +62,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
   const [priceError, setPriceError] = useState(false)
   const [newPrice, setPrice] = useState(0)
   const classes = useStyles()
-  const { name, description, image, price } = nft
-  const isSold = action === 'none'
-  const priceLabel = nft.price ? `Price (last time sold for ${nft.price} MATIC)` : 'Price'
+  const { name, description, image } = nft
 
   const actions = {
     buy: {
@@ -73,7 +71,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
     },
     cancel: {
       text: 'cancel',
-      method: () => {}
+      method: cancelNft
     },
     sell: {
       text: 'sell',
@@ -90,6 +88,12 @@ export default function NFTCard ({ nft, action, updateNFT }) {
     const transaction = await marketplaceContract.createMarketSale(nftContract.address, nft.marketItemId, {
       value: price
     })
+    await transaction.wait()
+    updateNFT()
+  }
+
+  async function cancelNft (nft) {
+    const transaction = await marketplaceContract.cancelMarketItem(nftContract.address, nft.marketItemId)
     await transaction.wait()
     updateNFT()
   }
@@ -144,12 +148,12 @@ export default function NFTCard ({ nft, action, updateNFT }) {
         <Divider className={classes.firstDivider} />
         <Box className={classes.addressesAndPrice}>
           <div className={classes.addessesContainer}>
-            <CardAddresses nft={nft} isSold={isSold}/>
+            <CardAddresses nft={nft} />
           </div>
           <div className={classes.priceContainer}>
             {action === 'sell'
-              ? <PriceTextField error={priceError} label={priceLabel} disabled={isLoading} onChange={e => setPrice(e.target.value)}/>
-              : <NFTPrice price={price} isSold={isSold}/>
+              ? <PriceTextField error={priceError} disabled={isLoading} onChange={e => setPrice(e.target.value)}/>
+              : <NFTPrice nft={nft}/>
             }
           </div>
         </Box>

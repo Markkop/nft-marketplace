@@ -1,10 +1,10 @@
 import { TextField } from '@mui/material'
 
-export default function PriceTextField ({ label, onChange, disabled, error }) {
+export default function PriceTextField ({ onChange, disabled, error }) {
   return (
     <TextField
       id="price-input"
-      label={label}
+      label="Price"
       name="price"
       size="small"
       fullWidth

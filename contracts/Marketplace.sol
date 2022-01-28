@@ -11,6 +11,7 @@ contract Marketplace is ReentrancyGuard {
 
     Counters.Counter private _marketItemIds;
     Counters.Counter private _tokensSold;
+    Counters.Counter private _tokensCanceled;
 
     address payable private owner;
 
@@ -28,6 +29,7 @@ contract Marketplace is ReentrancyGuard {
         address payable owner;
         uint256 price;
         bool sold;
+        bool canceled;
     }
 
     event MarketItemCreated(
@@ -38,7 +40,8 @@ contract Marketplace is ReentrancyGuard {
         address seller,
         address owner,
         uint256 price,
-        bool sold
+        bool sold,
+        bool canceled
     );
 
     constructor() {
@@ -57,7 +60,7 @@ contract Marketplace is ReentrancyGuard {
         address nftContractAddress,
         uint256 tokenId,
         uint256 price
-    ) public payable nonReentrant {
+    ) public payable nonReentrant returns (uint256) {
         require(price > 0, "Price must be at least 1 wei");
         require(msg.value == listingFee, "Price must be equal to listing price");
         _marketItemIds.increment();
@@ -73,6 +76,7 @@ contract Marketplace is ReentrancyGuard {
             payable(msg.sender),
             payable(address(0)),
             price,
+            false,
             false
         );
 
@@ -86,8 +90,28 @@ contract Marketplace is ReentrancyGuard {
             payable(msg.sender),
             payable(address(0)),
             price,
+            false,
             false
         );
+
+        return marketItemId;
+    }
+
+    /**
+     * @dev Cancel a market item
+     */
+    function cancelMarketItem(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
+        uint256 tokenId = marketItemIdToMarketItem[marketItemId].tokenId;
+        require(tokenId > 0, "Market item has to exist");
+
+        require(marketItemIdToMarketItem[marketItemId].seller == msg.sender, "You are not the seller");
+
+        IERC721(nftContractAddress).transferFrom(address(this), msg.sender, tokenId);
+
+        marketItemIdToMarketItem[marketItemId].owner = payable(msg.sender);
+        marketItemIdToMarketItem[marketItemId].canceled = true;
+
+        _tokensCanceled.increment();
     }
 
     /**
@@ -133,8 +157,10 @@ contract Marketplace is ReentrancyGuard {
      */
     function fetchUnsoldMarketItems() public view returns (MarketItem[] memory) {
         uint256 itemsCount = _marketItemIds.current();
-        uint256 unsoldItemsCount = _marketItemIds.current() - _tokensSold.current();
-        MarketItem[] memory marketItems = new MarketItem[](unsoldItemsCount);
+        uint256 soldItemsCount = _tokensSold.current();
+        uint256 canceledItemsCount = _tokensCanceled.current();
+        uint256 availableItemsCount = itemsCount - soldItemsCount - canceledItemsCount;
+        MarketItem[] memory marketItems = new MarketItem[](availableItemsCount);
 
         uint256 currentIndex = 0;
         for (uint256 i = 0; i < itemsCount; i++) {
