@@ -16,8 +16,8 @@ async function getMintedTokenId (transaction) {
 
 async function getCreatedMarketItemId (transaction) {
   const transactionResult = await transaction.wait()
-  const event = transactionResult.events[2]
-  const value = event.args[0]
+  const marketItemEvent = transactionResult.events.find(event => event.args)
+  const value = marketItemEvent.args[0]
   return value.toNumber()
 }
 
@@ -61,9 +61,10 @@ async function setupMarket (marketplaceAddress, nftAddress) {
   console.log(`${acc2.address} minted tokens ${yellowTokenId} and ${ashleyTokenId} and listed them as market items`)
 
   await marketplaceContract.createMarketSale(nftContractAddress, yellowTokenId, { value: price })
+  console.log(`${acc1.address} bought token ${yellowTokenId}`)
   await nftContract.approve(marketplaceContract.address, yellowTokenId)
   await marketplaceContract.createMarketItem(nftContractAddress, yellowTokenId, price, { value: listingFee })
-  console.log(`${acc1.address} bought token ${yellowTokenId} and put it for sale`)
+  console.log(`${acc1.address} put token ${yellowTokenId} for sale`)
 
   await marketplaceContract.connect(acc2).createMarketSale(nftContractAddress, dogsTokenId, { value: price })
   await nftContract.connect(acc2).approve(marketplaceContract.address, dogsTokenId)

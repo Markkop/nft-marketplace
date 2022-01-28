@@ -27,7 +27,7 @@ async function updateVercelEnviromentVariableByNames (...envNames) {
     const envIds = await getProjectEnvironmentVariablesIds(...envNames)
     for (const envName in envIds) {
       await updateVercelEnviromentVariableById(envIds[envName], process.env[envName])
-      console.log(`Vercel env ${process.env[envName]} updated`)
+      console.log(`Vercel env ${envName}=${process.env[envName]} updated`)
     }
   } catch (error) {
     console.log(error)
@@ -49,6 +49,7 @@ async function updateVercelEnviromentVariableById (id, newValue) {
 
 async function triggerDeployment () {
   try {
+    console.log('Triggering a new deployment...')
     await axios.post(`${vercelUrl}/v1/integrations/deploy/${VERCEL_PROJECT_ID}/${VERCEL_DEPLOY_TOKEN}`)
   } catch (error) {
     console.log(error)

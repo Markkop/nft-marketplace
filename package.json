@@ -11,7 +11,9 @@
     "deploy:localhost": "hardhat run scripts/deploy.js --network localhost",
     "deploy:mumbai": "hardhat run scripts/deploy.js --network mumbai",
     "setup-marketplace:localhost": "hardhat run scripts/setupMarket.js --network localhost",
-    "setup": "npm run deploy:localhost && npm run setup-marketplace:localhost"
+    "setup-marketplace:mumbai": "hardhat run scripts/setupMarket.js --network mumbai",
+    "setup": "npm run deploy:localhost && npm run setup-marketplace:localhost",
+    "env": "hardhat run scripts/updateVercelEnviromentKeys.js --network mumbai"
   },
   "dependencies": {
     "@emotion/cache": "^11.7.1",
