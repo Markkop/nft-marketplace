@@ -2,7 +2,7 @@
 import { useContext, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { makeStyles } from '@mui/styles'
-import { TextField, Card, CardActions, CardContent, CardMedia, Button } from '@mui/material'
+import { TextField, Card, CardActions, CardContent, CardMedia, Button, CircularProgress } from '@mui/material'
 import axios from 'axios'
 import { Web3Context } from '../providers/Web3Provider'
 
@@ -29,6 +29,7 @@ export default function NFTCardCreation ({ addNFTToList }) {
   const classes = useStyles()
   const { register, handleSubmit } = useForm()
   const { nftContract } = useContext(Web3Context)
+  const [isLoading, setIsLoading] = useState(false)
 
   async function createNft (metadataUrl) {
     const transaction = await nftContract.mintToken(metadataUrl)
@@ -61,10 +62,18 @@ export default function NFTCardCreation ({ addNFTToList }) {
   }
 
   async function onSubmit ({ name, description }) {
-    const formData = createNFTFormDataFile(name, description, file)
-    const metadataUrl = await uploadFileToIPFS(formData)
-    const tokenId = await createNft(metadataUrl)
-    addNFTToList(tokenId)
+    try {
+      if (!file || isLoading) return
+      setIsLoading(true)
+      const formData = createNFTFormDataFile(name, description, file)
+      const metadataUrl = await uploadFileToIPFS(formData)
+      const tokenId = await createNft(metadataUrl)
+      addNFTToList(tokenId)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -92,6 +101,7 @@ export default function NFTCardCreation ({ addNFTToList }) {
           fullWidth
           required
           margin="dense"
+          disabled={isLoading}
           {...register('name')}
         />
          <TextField
@@ -104,11 +114,17 @@ export default function NFTCardCreation ({ addNFTToList }) {
           fullWidth
           required
           margin="dense"
+          disabled={isLoading}
           {...register('description')}
         />
       </CardContent>
       <CardActions className={classes.cardActions}>
-        <Button size="small" type="submit">Create</Button>
+        <Button size="small" type="submit">
+          {isLoading
+            ? <CircularProgress size="20px" />
+            : 'Create'
+          }
+        </Button>
       </CardActions>
     </Card>
   )

@@ -1,6 +1,6 @@
 import { TextField } from '@mui/material'
 
-export default function PriceTextField ({ label, onChange, disabled }) {
+export default function PriceTextField ({ label, onChange, disabled, error }) {
   return (
     <TextField
       id="price-input"
@@ -14,6 +14,7 @@ export default function PriceTextField ({ label, onChange, disabled }) {
       inputProps={{ step: 'any' }}
       disabled={disabled}
       onChange={onChange}
+      error={error}
       sx={{ margin: '0' }}
     />
   )

@@ -1,5 +1,8 @@
-/* ./styles/globals.css */
-/* @tailwind base;
-@tailwind components;
-@tailwind utilities; */
-@import "../node_modules/bulma/css/bulma.css";
+.currency-image {
+  margin: 80px;
+  border: 5px solid black;
+}
+
+p {
+  color: white;
+}

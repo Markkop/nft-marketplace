@@ -2,7 +2,7 @@
 import { ethers } from 'ethers'
 import { useContext, useState } from 'react'
 import { makeStyles } from '@mui/styles'
-import { Card, CardActions, CardContent, CardMedia, Button, Divider, Box } from '@mui/material'
+import { Card, CardActions, CardContent, CardMedia, Button, Divider, Box, CircularProgress } from '@mui/material'
 import { NFTModalContext } from '../providers/NFTModalProvider'
 import { Web3Context } from '../providers/Web3Provider'
 import NFTDescription from '../atoms/NFTDescription'
@@ -52,13 +52,14 @@ const useStyles = makeStyles({
     marginTop: 'auto',
     padding: '0 16px 8px 16px'
   }
-
 })
 
 export default function NFTCard ({ nft, action, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
   const { nftContract, marketplaceContract, hasWeb3 } = useContext(Web3Context)
   const [isHovered, setIsHovered] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [priceError, setPriceError] = useState(false)
   const [newPrice, setPrice] = useState(0)
   const classes = useStyles()
   const { name, description, image, price } = nft
@@ -94,6 +95,11 @@ export default function NFTCard ({ nft, action, updateNFT }) {
   }
 
   async function sellNft (nft) {
+    if (!newPrice) {
+      setPriceError(true)
+      return
+    }
+    setPriceError(false)
     const listingFee = await marketplaceContract.getListingFee()
     const priceInWei = ethers.utils.parseUnits(newPrice, 'ether')
     const transaction = await marketplaceContract.createMarketItem(nftContract.address, nft.tokenId, priceInWei, { value: listingFee.toString() })
@@ -108,7 +114,14 @@ export default function NFTCard ({ nft, action, updateNFT }) {
   }
 
   async function onClick (nft) {
-    await actions[action].method(nft)
+    try {
+      setIsLoading(true)
+      await actions[action].method(nft)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -135,7 +148,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
           </div>
           <div className={classes.priceContainer}>
             {action === 'sell'
-              ? <PriceTextField label={priceLabel} onChange={e => setPrice(e.target.value)}/>
+              ? <PriceTextField error={priceError} label={priceLabel} disabled={isLoading} onChange={e => setPrice(e.target.value)}/>
               : <NFTPrice price={price} isSold={isSold}/>
             }
           </div>
@@ -143,7 +156,12 @@ export default function NFTCard ({ nft, action, updateNFT }) {
         <Divider className={classes.lastDivider} />
       </CardContent>
       <CardActions className={classes.cardActions}>
-        <Button size="small" onClick={() => onClick(nft)}>{hasWeb3 && actions[action].text}</Button>
+        <Button size="small" onClick={() => !isLoading && onClick(nft)}>
+          {isLoading
+            ? <CircularProgress size="20px" />
+            : hasWeb3 && actions[action].text
+          }
+        </Button>
       </CardActions>
     </Card>
   )
