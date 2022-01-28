@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   root: {
     flexDirection: 'column',
     display: 'flex',
-    margin: '15px 15px',
+    margin: '15px',
     flexGrow: 1,
     maxWidth: 345
   },

@@ -13,7 +13,7 @@ import { getNFTById } from '../../utils/nft'
 const useStyles = makeStyles((theme) => ({
   grid: {
     spacing: 3,
-    alignItems: 'center'
+    alignItems: 'stretch'
   },
   gridItem: {
     display: 'flex',
