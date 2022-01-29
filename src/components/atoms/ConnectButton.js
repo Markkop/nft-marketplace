@@ -1,12 +1,18 @@
 import { Button } from '@mui/material'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Web3Context } from '../providers/Web3Provider'
 
 export default function ConnectButton () {
-  const { initializeWeb3, hasWeb3 } = useContext(Web3Context)
-  const buttonText = hasWeb3 ? 'Connect' : 'Download Metamask'
+  const { initializeWeb3 } = useContext(Web3Context)
+  const [hasWindowEthereum, setHasWindowmEthereum] = useState(false)
+
+  useEffect(() => {
+    setHasWindowmEthereum(window.ethereum)
+  }, [])
+
+  const buttonText = hasWindowEthereum ? 'Connect' : 'Download Metamask'
   const onClick = () => {
-    if (hasWeb3) {
+    if (hasWindowEthereum) {
       return initializeWeb3()
     }
 
