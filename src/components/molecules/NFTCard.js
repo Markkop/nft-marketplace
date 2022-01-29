@@ -1,6 +1,6 @@
 
 import { ethers } from 'ethers'
-import { useContext, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { makeStyles } from '@mui/styles'
 import { Card, CardActions, CardContent, CardMedia, Button, Divider, Box, CircularProgress } from '@mui/material'
 import { NFTModalContext } from '../providers/NFTModalProvider'
@@ -54,15 +54,25 @@ const useStyles = makeStyles({
   }
 })
 
+async function getAndSetListingFee (marketplaceContract, setListingFee) {
+  const listingFee = await marketplaceContract.getListingFee()
+  setListingFee(ethers.utils.formatUnits(listingFee, 'ether'))
+}
+
 export default function NFTCard ({ nft, action, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
   const { nftContract, marketplaceContract, hasWeb3 } = useContext(Web3Context)
   const [isHovered, setIsHovered] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [listingFee, setListingFee] = useState('')
   const [priceError, setPriceError] = useState(false)
   const [newPrice, setPrice] = useState(0)
   const classes = useStyles()
   const { name, description, image } = nft
+
+  useEffect(() => {
+    getAndSetListingFee(marketplaceContract, setListingFee)
+  }, [])
 
   const actions = {
     buy: {
@@ -74,7 +84,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
       method: cancelNft
     },
     sell: {
-      text: 'sell',
+      text: listingFee ? `Sell (${listingFee} fee)` : 'Sell',
       method: sellNft
     },
     none: {
@@ -152,7 +162,7 @@ export default function NFTCard ({ nft, action, updateNFT }) {
           </div>
           <div className={classes.priceContainer}>
             {action === 'sell'
-              ? <PriceTextField error={priceError} disabled={isLoading} onChange={e => setPrice(e.target.value)}/>
+              ? <PriceTextField listingFee={listingFee} error={priceError} disabled={isLoading} onChange={e => setPrice(e.target.value)}/>
               : <NFTPrice nft={nft}/>
             }
           </div>

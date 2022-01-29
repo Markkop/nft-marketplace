@@ -3,13 +3,11 @@
 [![https://img.shields.io/badge/made%20with-hardhat-yellow](https://img.shields.io/badge/made%20with-hardhat-yellow)](https://hardhat.org/)
 [![https://img.shields.io/badge/made%20with-nextjs-blue](https://img.shields.io/badge/made%20with-nextjs-blue)](https://nextjs.org/)
 
-This is a fullstack dApp for an NFT Marketplace.  
-The initial project was based on this [Udemy](ttps://www.udemy.com/course/build-an-nft-marketplace-from-scratch-blockchain-dapp/)'s / [Youtube](https://www.youtube.com/watch?v=GKJBEEXUha0)'s tutorial.  
-However, to practice even further my blockchain and smart contract skills I've refactored most of the existing code and added several new features.
+This is a fullstack DApp NFT Marketplace.
 
 ## Demo
 
-https://nft-marketplace-ashen.vercel.app/ (Work still in progress)
+https://nft-marketplace-ashen.vercel.app/
 
 ## Features
 
