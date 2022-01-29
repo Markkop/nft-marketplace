@@ -1,7 +1,8 @@
-import { Box, Button, Container, Typography } from '@mui/material'
+import { Button } from '@mui/material'
 import { useContext } from 'react'
 import { getProvider, chains } from '../../utils/web3'
 import { Web3Context } from '../providers/Web3Provider'
+import PageMessageBox from './PageMessageBox'
 
 const toHex = (num) => {
   return '0x' + num.toString(16)
@@ -43,33 +44,22 @@ export default function UnsupportedChain () {
   }
 
   return (
-    <Container >
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        textAlign: 'center',
-        flexShrink: 1,
-        p: 1,
-        m: 1
-      }} >
-        <Typography variant="body3" color="text.secondary" >
-          This blockchain is not supported.
-        </Typography>
-        <Button
-          variant='outlined'
-          color='primary'
-          onClick={ () => addNetwork(chains.polygonMumbaiTestnet, account) }
-          sx={{
-            maxWidth: 600,
-            margin: 'auto',
-            display: 'flex',
-            justifyContent: 'center'
-          }}
-        >
-          { renderProviderText() }
-        </Button>
-      </Box>
-    </Container>
+    <PageMessageBox
+      text="This blockchain is not supported."
+    >
+      <Button
+        variant='outlined'
+        color='primary'
+        onClick={ () => addNetwork(chains.polygonMumbaiTestnet, account) }
+        sx={{
+          maxWidth: 600,
+          margin: 'auto',
+          display: 'flex',
+          justifyContent: 'center'
+        }}
+      >
+        { renderProviderText() }
+      </Button>
+    </PageMessageBox>
   )
 }

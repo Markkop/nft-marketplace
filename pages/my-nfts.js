@@ -4,11 +4,18 @@ import InstallMetamask from '../src/components/molecules/InstallMetamask'
 import NFTCardList from '../src/components/organisms/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
 import { getNFTById } from '../src/utils/nft'
+import UnsupportedChain from '../src/components/molecules/UnsupportedChain'
+import ConnectWalletMessage from '../src/components/molecules/ConnectWalletMessage'
 
 export default function CreatorDashboard () {
   const [nfts, setNfts] = useState([])
-  const { account, marketplaceContract, nftContract, isReady, hasWeb3 } = useContext(Web3Context)
+  const { account, marketplaceContract, nftContract, isReady, hasWeb3, network } = useContext(Web3Context)
   const [isLoading, setIsLoading] = useState(true)
+  const [hasWindowEthereum, setHasWindowmEthereum] = useState(false)
+
+  useEffect(() => {
+    setHasWindowmEthereum(window.ethereum)
+  }, [])
 
   useEffect(() => {
     loadNFTs()
@@ -28,7 +35,9 @@ export default function CreatorDashboard () {
     setIsLoading(false)
   }
 
-  if (!hasWeb3) return <InstallMetamask/>
+  if (!hasWindowEthereum) return <InstallMetamask/>
+  if (!hasWeb3) return <ConnectWalletMessage/>
+  if (!network) return <UnsupportedChain/>
   if (isLoading) return <LinearProgress/>
 
   return (
