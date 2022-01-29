@@ -23,11 +23,13 @@ const useStyles = makeStyles({
   }
 })
 
+const defaultFileUrl = 'https://miro.medium.com/max/250/1*DSNfSDcOe33E2Aup1Sww2w.jpeg'
+
 export default function NFTCardCreation ({ addNFTToList }) {
   const [file, setFile] = useState(null)
-  const [fileUrl, setFileUrl] = useState('https://miro.medium.com/max/250/1*DSNfSDcOe33E2Aup1Sww2w.jpeg')
+  const [fileUrl, setFileUrl] = useState(defaultFileUrl)
   const classes = useStyles()
-  const { register, handleSubmit } = useForm()
+  const { register, handleSubmit, reset } = useForm()
   const { nftContract } = useContext(Web3Context)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -69,6 +71,8 @@ export default function NFTCardCreation ({ addNFTToList }) {
       const metadataUrl = await uploadFileToIPFS(formData)
       const tokenId = await createNft(metadataUrl)
       addNFTToList(tokenId)
+      setFileUrl(defaultFileUrl)
+      reset()
     } catch (error) {
       console.log(error)
     } finally {
