@@ -68,7 +68,7 @@ export default function Web3Provider ({ children }) {
       }
 
       connection.on('accountsChanged', onAccountsChanged)
-      connection.on('chainsChanged', initializeWeb3)
+      connection.on('chainChanged', initializeWeb3)
     } catch (error) {
       initializeWeb3WithoutSigner()
       console.log(error)
