@@ -1,5 +1,5 @@
 
-import { ethers, BigNumber } from 'ethers'
+import { ethers } from 'ethers'
 import { useContext, useEffect, useState } from 'react'
 import { makeStyles } from '@mui/styles'
 import { Card, CardActions, CardContent, CardMedia, Button, Divider, Box, CircularProgress } from '@mui/material'
