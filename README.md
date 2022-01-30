@@ -125,6 +125,12 @@ _\* You'll need to create the envs on Vercel first_
 
 _\* They're usually caused by incorrect contract addresses and wrong default gas values_
 
+# Wishlist
+
+- Refactor frontend code to accept other networks besides Mumbai
+- Lazyload for NFTs images and metadata
+- Add support for custom ERC20 tokens as payment (started on [#2](https://github.com/Markkop/nft-marketplace/pull/2))
+
 # Troubleshooting
 
 ## Mumbai marketplace setup command is breaking with a 'estimate gas failed' error
