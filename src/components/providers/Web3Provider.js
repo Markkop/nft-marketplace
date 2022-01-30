@@ -3,6 +3,7 @@ import Web3Modal from 'web3modal'
 import { ethers } from 'ethers'
 import NFT from '../../../artifacts/contracts/NFT.sol/NFT.json'
 import Market from '../../../artifacts/contracts/Marketplace.sol/Marketplace.json'
+import ERC20 from '../../../artifacts/contracts/MarkToken.sol/MarkToken.json'
 import axios from 'axios'
 
 const contextDefaultValues = {
@@ -12,6 +13,7 @@ const contextDefaultValues = {
   connectWallet: () => {},
   marketplaceContract: null,
   nftContract: null,
+  erc20Contract: null,
   isReady: false,
   hasWeb3: false
 }
@@ -32,6 +34,7 @@ export default function Web3Provider ({ children }) {
   const [balance, setBalance] = useState(contextDefaultValues.balance)
   const [marketplaceContract, setMarketplaceContract] = useState(contextDefaultValues.marketplaceContract)
   const [nftContract, setNFTContract] = useState(contextDefaultValues.nftContract)
+  const [erc20Contract, setERC20Contract] = useState(contextDefaultValues.erc20Contract)
   const [isReady, setIsReady] = useState(contextDefaultValues.isReady)
 
   useEffect(() => {
@@ -117,6 +120,8 @@ export default function Web3Provider ({ children }) {
     setMarketplaceContract(marketplaceContract)
     const nftContract = new ethers.Contract(data.nftAddress, NFT.abi, signer)
     setNFTContract(nftContract)
+    const erc20Contract = new ethers.Contract(data.erc20Address, ERC20.abi, signer)
+    setERC20Contract(erc20Contract)
     return true
   }
 
@@ -126,6 +131,7 @@ export default function Web3Provider ({ children }) {
         account,
         marketplaceContract,
         nftContract,
+        erc20Contract,
         isReady,
         network,
         balance,
