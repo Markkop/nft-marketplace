@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import InstallMetamask from '../src/components/molecules/InstallMetamask'
 import NFTCardList from '../src/components/organisms/NFTCardList'
 import { Web3Context } from '../src/components/providers/Web3Provider'
-import { getNFTById } from '../src/utils/nft'
+import { mapCreatedAndOwnedTokenIdsAsMarketItems, getUniqueOwnedAndCreatedTokenIds } from '../src/utils/nft'
 import UnsupportedChain from '../src/components/molecules/UnsupportedChain'
 import ConnectWalletMessage from '../src/components/molecules/ConnectWalletMessage'
 
@@ -23,13 +23,9 @@ export default function CreatorDashboard () {
 
   async function loadNFTs () {
     if (!isReady || !hasWeb3) return <></>
-    const nftIdsCreatedByMe = await nftContract.getTokensCreatedByMe()
-    const nftIdsOwnedByMe = await nftContract.getTokensOwnedByMe()
-    const myNftIds = [...nftIdsCreatedByMe, ...nftIdsOwnedByMe]
-    const myUniqueNftIds = [...new Map(myNftIds.map((item) => [item._hex, item])).values()]
-
-    const myNfts = await Promise.all(myUniqueNftIds.map(async (nftId) =>
-      await getNFTById(nftContract, marketplaceContract, account, nftId)
+    const myUniqueCreatedAndOwnedTokenIds = await getUniqueOwnedAndCreatedTokenIds(nftContract)
+    const myNfts = await Promise.all(myUniqueCreatedAndOwnedTokenIds.map(
+      mapCreatedAndOwnedTokenIdsAsMarketItems(marketplaceContract, nftContract, account)
     ))
     setNfts(myNfts)
     setIsLoading(false)
