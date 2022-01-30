@@ -153,9 +153,9 @@ contract Marketplace is ReentrancyGuard {
     }
 
     /**
-     * @dev Fetch unsold market items
+     * @dev Fetch non sold and non canceled market items
      */
-    function fetchUnsoldMarketItems() public view returns (MarketItem[] memory) {
+    function fetchAvailableMarketItems() public view returns (MarketItem[] memory) {
         uint256 itemsCount = _marketItemIds.current();
         uint256 soldItemsCount = _tokensSold.current();
         uint256 canceledItemsCount = _tokensCanceled.current();

@@ -236,7 +236,7 @@ describe('Marketplace', function () {
       .to.be.revertedWith('Please submit the asking price in order to continue')
   })
 
-  it('fetches unsold NFT tokens', async function () {
+  it('fetches available NFT tokens', async function () {
     // Arrange
     const price = ethers.utils.parseEther('10')
     const listingFee = await marketplaceContract.getListingFee()
@@ -245,7 +245,7 @@ describe('Marketplace', function () {
     await mintTokenAndCreateMarketItem(2, price, transactionOptions)
 
     // Act
-    const unsoldMarketItems = await marketplaceContract.fetchUnsoldMarketItems()
+    const unsoldMarketItems = await marketplaceContract.fetchAvailableMarketItems()
 
     // Assert
     expect(unsoldMarketItems.length).to.equal(2)
