@@ -8,7 +8,7 @@ Made with NodeJS, Hardhat, Solidity, ReactJS, NextJS and Vercel.
 
 ## Demo
 
-![Demo](https://i.imgur.com/YeoXdP7.gif)
+![Demo](https://github.com/Markkop/nft-marketplace/demo.gif)
 
 https://nft-marketplace-markkop.vercel.app/
 
