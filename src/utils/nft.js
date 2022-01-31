@@ -21,13 +21,15 @@ export function mapAvailableMarketItems (nftContract) {
 export function mapCreatedAndOwnedTokenIdsAsMarketItems (marketplaceContract, nftContract, account) {
   return async (tokenId) => {
     const metadata = await getTokenMetadataByTokenId(nftContract, tokenId)
+    const approveAddress = await nftContract.getApproved(tokenId)
+    const hasMarketApproval = approveAddress === marketplaceContract.address
     const [foundMarketItem, hasFound] = await marketplaceContract.getLatestMarketItemByTokenId(tokenId)
     const marketItem = hasFound ? foundMarketItem : {}
-    return mapMarketItem(marketItem, metadata, tokenId, account)
+    return mapMarketItem(marketItem, metadata, tokenId, account, hasMarketApproval)
   }
 }
 
-export function mapMarketItem (marketItem, metadata, tokenId, account) {
+export function mapMarketItem (marketItem, metadata, tokenId, account, hasMarketApproval) {
   return {
     price: marketItem.price ? ethers.utils.formatUnits(marketItem.price, 'ether') : undefined,
     tokenId: marketItem.tokenId || tokenId,
@@ -39,7 +41,8 @@ export function mapMarketItem (marketItem, metadata, tokenId, account) {
     canceled: marketItem.canceled || false,
     image: metadata.image,
     name: metadata.name,
-    description: metadata.description
+    description: metadata.description,
+    hasMarketApproval: hasMarketApproval || false
   }
 }
 
