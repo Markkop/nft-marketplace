@@ -62,7 +62,7 @@ async function getAndSetListingFee (marketplaceContract, setListingFee) {
 
 export default function NFTCard ({ nft, action, updateNFT }) {
   const { setModalNFT, setIsModalOpen } = useContext(NFTModalContext)
-  const { nftContract, marketplaceContract, erc20Contract, hasWeb3 } = useContext(Web3Context)
+  const { nftContract, marketplaceContract, hasWeb3 } = useContext(Web3Context)
   const [isHovered, setIsHovered] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [listingFee, setListingFee] = useState('')
@@ -96,10 +96,10 @@ export default function NFTCard ({ nft, action, updateNFT }) {
 
   async function buyNft (nft) {
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
-    const transaction1 = await erc20Contract.approve(marketplaceContract.address, price)
-    await transaction1.wait()
-    const transaction2 = await marketplaceContract.createMarketSale(nftContract.address, erc20Contract.address, nft.marketItemId)
-    await transaction2.wait()
+    const transaction = await marketplaceContract.createMarketSale(nftContract.address, nft.marketItemId, {
+      value: price
+    })
+    await transaction.wait()
     updateNFT()
   }
 
@@ -117,12 +117,10 @@ export default function NFTCard ({ nft, action, updateNFT }) {
     setPriceError(false)
     const listingFee = await marketplaceContract.getListingFee()
     const priceInWei = ethers.utils.parseUnits(newPrice, 'ether')
-    const transaction1 = await erc20Contract.approve(marketplaceContract.address, listingFee)
-    await transaction1.wait()
-    const transaction2 = await marketplaceContract.createMarketItem(nftContract.address, erc20Contract.address, listingFee, nft.tokenId, priceInWei)
-    await transaction2.wait()
+    const transaction = await marketplaceContract.createMarketItem(nftContract.address, nft.tokenId, priceInWei, { value: listingFee.toString() })
+    await transaction.wait()
     updateNFT()
-    return transaction2
+    return transaction
   }
 
   function handleCardImageClick () {
