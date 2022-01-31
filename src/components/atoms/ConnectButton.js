@@ -4,10 +4,10 @@ import { Web3Context } from '../providers/Web3Provider'
 
 export default function ConnectButton () {
   const { initializeWeb3 } = useContext(Web3Context)
-  const [hasWindowEthereum, setHasWindowmEthereum] = useState(false)
+  const [hasWindowEthereum, setHasWindowEthereum] = useState(false)
 
   useEffect(() => {
-    setHasWindowmEthereum(window.ethereum)
+    setHasWindowEthereum(window.ethereum)
   }, [])
 
   const buttonText = hasWindowEthereum ? 'Connect' : 'Download Metamask'

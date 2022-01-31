@@ -11,10 +11,10 @@ export default function CreatorDashboard () {
   const [nfts, setNfts] = useState([])
   const { account, marketplaceContract, nftContract, isReady, hasWeb3, network } = useContext(Web3Context)
   const [isLoading, setIsLoading] = useState(true)
-  const [hasWindowEthereum, setHasWindowmEthereum] = useState(false)
+  const [hasWindowEthereum, setHasWindowEthereum] = useState(false)
 
   useEffect(() => {
-    setHasWindowmEthereum(window.ethereum)
+    setHasWindowEthereum(window.ethereum)
   }, [])
 
   useEffect(() => {
