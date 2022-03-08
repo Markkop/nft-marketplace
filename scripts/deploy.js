@@ -2,12 +2,13 @@ const hre = require('hardhat')
 const dotenv = require('dotenv')
 const fs = require('fs')
 
-function replaceEnvContractAddresses (marketplaceAddress, nftAddress, networkName) {
+function replaceEnvContractAddresses (marketplaceAddress, nftAddress, erc20Address, networkName) {
   const envFileName = '.env.local'
   const envFile = fs.readFileSync(envFileName, 'utf-8')
   const env = dotenv.parse(envFile)
   env[`MARKETPLACE_CONTRACT_ADDRESS_${networkName}`] = marketplaceAddress
   env[`NFT_CONTRACT_ADDRESS_${networkName}`] = nftAddress
+  env[`ERC20_CONTRACT_ADDRESS_${networkName}`] = erc20Address
   const newEnv = Object.entries(env).reduce((env, [key, value]) => {
     return `${env}${key}=${value}\n`
   }, '')
@@ -27,7 +28,12 @@ async function main () {
   await nft.deployed()
   console.log('Nft deployed to:', nft.address)
 
-  replaceEnvContractAddresses(marketplace.address, nft.address, hre.network.name.toUpperCase())
+  const ERC20 = await hre.ethers.getContractFactory('MarkToken')
+  const erc20 = await ERC20.deploy()
+  await erc20.deployed()
+  console.log('Erc20 deployed to:', erc20.address)
+
+  replaceEnvContractAddresses(marketplace.address, nft.address, erc20.address, hre.network.name.toUpperCase())
 }
 
 main()

@@ -21,16 +21,20 @@ async function getCreatedMarketItemId (transaction) {
   return value.toNumber()
 }
 
-async function setupMarket (marketplaceAddress, nftAddress) {
+async function setupMarket (marketplaceAddress, nftAddress, erc20Address) {
   const networkName = hre.network.name.toUpperCase()
   marketplaceAddress = marketplaceAddress || process.env[`MARKETPLACE_CONTRACT_ADDRESS_${networkName}`]
   nftAddress = nftAddress || process.env[`NFT_CONTRACT_ADDRESS_${networkName}`]
+  erc20Address = erc20Address || process.env[`ERC20_CONTRACT_ADDRESS_${networkName}`]
 
   const marketplaceContract = await hre.ethers.getContractAt('Marketplace', marketplaceAddress)
   const nftContract = await hre.ethers.getContractAt('NFT', nftAddress)
+  const erc20Contract = await hre.ethers.getContractAt('MarkToken', erc20Address)
   const nftContractAddress = nftContract.address
+  const erc20ContractAddress = erc20Contract.address
   const [acc1, acc2] = await hre.ethers.getSigners()
 
+  await erc20Contract.transfer(acc2.address, hre.ethers.utils.parseEther('500000'))
   const price = hre.ethers.utils.parseEther('0.01')
   const listingFee = await marketplaceContract.getListingFee()
 
@@ -42,11 +46,20 @@ async function setupMarket (marketplaceAddress, nftAddress) {
   const codeconTokenId = await getMintedTokenId(codeconMintTx)
   const webArMintTx = await nftContract.mintToken(webArMetadataUrl)
   const webArTokenId = await getMintedTokenId(webArMintTx)
-  await marketplaceContract.createMarketItem(nftContractAddress, dogsTokenId, price, { value: listingFee })
-  await marketplaceContract.createMarketItem(nftContractAddress, techEventTokenId, price, { value: listingFee })
-  const codeconMarketTx = await marketplaceContract.createMarketItem(nftContractAddress, codeconTokenId, price, { value: listingFee })
+
+  await erc20Contract.approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, dogsTokenId, price)
+
+  await erc20Contract.approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, techEventTokenId, price)
+
+  await erc20Contract.approve(marketplaceContract.address, listingFee)
+  const codeconMarketTx = await marketplaceContract.createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, codeconTokenId, price)
   const codeconMarketItemId = await getCreatedMarketItemId(codeconMarketTx)
-  await marketplaceContract.createMarketItem(nftContractAddress, webArTokenId, price, { value: listingFee })
+
+  await erc20Contract.approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, webArTokenId, price)
+
   console.log(`${acc1.address} minted tokens ${dogsTokenId}, ${techEventTokenId}, ${codeconTokenId} and ${webArTokenId} and listed them as market items`)
 
   await marketplaceContract.cancelMarketItem(nftContractAddress, codeconMarketItemId)
@@ -56,22 +69,29 @@ async function setupMarket (marketplaceAddress, nftAddress) {
   const yellowTokenId = await getMintedTokenId(yellowMintTx)
   const ashleyMintTx = await nftContract.connect(acc2).mintToken(ashleyMetadataUrl)
   const ashleyTokenId = await getMintedTokenId(ashleyMintTx)
-  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, yellowTokenId, price, { value: listingFee })
-  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, ashleyTokenId, price, { value: listingFee })
+  await erc20Contract.connect(acc2).approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, yellowTokenId, price)
+  await erc20Contract.connect(acc2).approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, ashleyTokenId, price)
   console.log(`${acc2.address} minted tokens ${yellowTokenId} and ${ashleyTokenId} and listed them as market items`)
 
-  await marketplaceContract.createMarketSale(nftContractAddress, yellowTokenId, { value: price })
+  await erc20Contract.approve(marketplaceContract.address, price)
+  await marketplaceContract.createMarketSale(nftContractAddress, erc20ContractAddress, yellowTokenId)
   console.log(`${acc1.address} bought token ${yellowTokenId}`)
   await nftContract.approve(marketplaceContract.address, yellowTokenId)
-  await marketplaceContract.createMarketItem(nftContractAddress, yellowTokenId, price, { value: listingFee })
+  await erc20Contract.approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, yellowTokenId, price)
   console.log(`${acc1.address} put token ${yellowTokenId} for sale`)
 
-  await marketplaceContract.connect(acc2).createMarketSale(nftContractAddress, dogsTokenId, { value: price })
+  await erc20Contract.connect(acc2).approve(marketplaceContract.address, price)
+  await marketplaceContract.connect(acc2).createMarketSale(nftContractAddress, erc20ContractAddress, dogsTokenId)
   await nftContract.connect(acc2).approve(marketplaceContract.address, dogsTokenId)
-  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, dogsTokenId, price, { value: listingFee })
+  await erc20Contract.connect(acc2).approve(marketplaceContract.address, listingFee)
+  await marketplaceContract.connect(acc2).createMarketItem(nftContractAddress, erc20ContractAddress, listingFee, dogsTokenId, price)
   console.log(`${acc2.address} bought token ${dogsTokenId} and put it for sale`)
 
-  await marketplaceContract.connect(acc2).createMarketSale(nftContractAddress, webArTokenId, { value: price })
+  await erc20Contract.connect(acc2).approve(marketplaceContract.address, price)
+  await marketplaceContract.connect(acc2).createMarketSale(nftContractAddress, erc20ContractAddress, webArTokenId)
   console.log(`${acc2.address} bought token ${webArTokenId}`)
 }
 

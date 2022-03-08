@@ -4,6 +4,7 @@ const { BigNumber } = require('ethers')
 
 describe('Marketplace', function () {
   let nftContract
+  let erc20Contract
   let marketplaceContract
   let nftContractAddress
   let owner
@@ -16,7 +17,11 @@ describe('Marketplace', function () {
 
     const NFT = await ethers.getContractFactory('NFT')
     nftContract = await NFT.deploy(marketplaceContract.address)
-    await nftContract.deployed();
+    await nftContract.deployed()
+
+    const ERC20 = await ethers.getContractFactory('MarkToken')
+    erc20Contract = await ERC20.deploy()
+    await erc20Contract.deployed();
 
     [owner, buyer] = await ethers.getSigners()
     nftContractAddress = nftContract.address
@@ -24,20 +29,20 @@ describe('Marketplace', function () {
 
   beforeEach(deployContractsAndSetAddresses)
 
-  async function mintTokenAndCreateMarketItem (tokenId, price, transactionOptions, account = owner) {
+  async function mintTokenAndCreateMarketItem (listingFee, tokenId, price, transactionOptions = {}, account = owner) {
     await nftContract.connect(account).mintToken('')
-    return marketplaceContract.connect(account).createMarketItem(nftContractAddress, tokenId, price, transactionOptions)
+    await erc20Contract.connect(account).approve(marketplaceContract.address, listingFee)
+    return marketplaceContract.connect(account).createMarketItem(nftContractAddress, erc20Contract.address, listingFee, tokenId, price, transactionOptions)
   }
 
-  it('creates a Market Item', async function () {
+  it.only('creates a Market Item', async function () {
     // Arrange
     const tokenId = 1
     const price = ethers.utils.parseEther('10')
     const listingFee = await marketplaceContract.getListingFee()
-    const transactionOptions = { value: listingFee }
 
     // Act and Assert
-    await expect(mintTokenAndCreateMarketItem(tokenId, price, transactionOptions))
+    await expect(mintTokenAndCreateMarketItem(listingFee, tokenId, price))
       .to.emit(marketplaceContract, 'MarketItemCreated')
       .withArgs(
         1,
@@ -202,22 +207,24 @@ describe('Marketplace', function () {
       .to.be.revertedWith('Price must be at least 1 wei')
   })
 
-  it('creates a Market Sale', async function () {
+  it.only('creates a Market Sale', async function () {
     // Arrange
-    const tokenId = 1
-    const price = ethers.utils.parseEther('1')
-    const listingFee = await marketplaceContract.getListingFee()
-    const transactionOptions = { value: listingFee }
+    await erc20Contract.transfer(buyer.address, ethers.utils.parseEther('500000'))
 
-    await mintTokenAndCreateMarketItem(tokenId, price, transactionOptions)
-    const initialOwnerBalance = await owner.getBalance()
+    const tokenId = 1
+    const price = ethers.utils.parseEther('33')
+    const listingFee = await marketplaceContract.getListingFee()
+    await mintTokenAndCreateMarketItem(listingFee, tokenId, price)
+    const initialOwnerBalance = await erc20Contract.balanceOf(owner.address)
 
     // Act
-    await marketplaceContract.connect(buyer).createMarketSale(nftContractAddress, 1, { value: price })
+    await erc20Contract.connect(buyer).approve(marketplaceContract.address, price)
+    await marketplaceContract.connect(buyer).createMarketSale(nftContractAddress, erc20Contract.address, 1)
 
     // Assert
     const expectedOwnerBalance = initialOwnerBalance.add(price).add(listingFee)
-    expect(await owner.getBalance()).to.equal(expectedOwnerBalance)
+
+    expect(await erc20Contract.balanceOf(owner.address)).to.equal(expectedOwnerBalance)
     expect(await nftContract.ownerOf(tokenId)).to.equal(buyer.address)
   })
 

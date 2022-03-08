@@ -3,6 +3,7 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./NFT.sol";
+import "./MarkToken.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
@@ -15,7 +16,6 @@ contract Marketplace is ReentrancyGuard {
 
     address payable private owner;
 
-    // Challenge: make this price dynamic according to the current currency price
     uint256 private listingFee = 0.045 ether;
 
     mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
@@ -58,11 +58,13 @@ contract Marketplace is ReentrancyGuard {
      */
     function createMarketItem(
         address nftContractAddress,
+        address erc20ContractAddress,
+        uint256 feeAmount,
         uint256 tokenId,
         uint256 price
     ) public payable nonReentrant returns (uint256) {
         require(price > 0, "Price must be at least 1 wei");
-        require(msg.value == listingFee, "Price must be equal to listing price");
+        require(feeAmount == listingFee, "Price must be equal to listing price");
         _marketItemIds.increment();
         uint256 marketItemId = _marketItemIds.current();
 
@@ -80,6 +82,7 @@ contract Marketplace is ReentrancyGuard {
             false
         );
 
+        MarkToken(erc20ContractAddress).transferFrom(msg.sender, address(this), listingFee);
         IERC721(nftContractAddress).transferFrom(msg.sender, address(this), tokenId);
 
         emit MarketItemCreated(
@@ -136,20 +139,23 @@ contract Marketplace is ReentrancyGuard {
      * @dev Creates a market sale by transfering msg.sender money to the seller and NFT token from the
      * marketplace to the msg.sender. It also sends the listingFee to the marketplace owner.
      */
-    function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
+    function createMarketSale(
+        address nftContractAddress,
+        address erc20ContractAddress,
+        uint256 marketItemId
+    ) public payable nonReentrant {
         uint256 price = marketItemIdToMarketItem[marketItemId].price;
         uint256 tokenId = marketItemIdToMarketItem[marketItemId].tokenId;
-        require(msg.value == price, "Please submit the asking price in order to continue");
 
         marketItemIdToMarketItem[marketItemId].owner = payable(msg.sender);
         marketItemIdToMarketItem[marketItemId].sold = true;
 
-        marketItemIdToMarketItem[marketItemId].seller.transfer(msg.value);
+        MarkToken(erc20ContractAddress).transferFrom(msg.sender, marketItemIdToMarketItem[marketItemId].seller, price);
         IERC721(nftContractAddress).transferFrom(address(this), msg.sender, tokenId);
 
         _tokensSold.increment();
 
-        payable(owner).transfer(listingFee);
+        MarkToken(erc20ContractAddress).transfer(owner, listingFee);
     }
 
     /**
